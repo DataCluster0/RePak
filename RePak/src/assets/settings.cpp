@@ -71,7 +71,7 @@ void SetupBuffersFromFieldType(rapidjson::Value& Value, size_t& ValueBuffer, siz
 		case SettingsFieldType::Float2:
 		case SettingsFieldType::Float3:
 		case SettingsFieldType::Array2:
-			if (ValueOffset == 0)
+			if (ValueOffset != 0)
 				ValueBuffer = ValueOffset + size;
 			else ValueBuffer += ValueOffset + size;
 			break;
@@ -197,6 +197,19 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	SettingsHeader* hdr = new SettingsHeader();
 
+	//header
+	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(SettingsHeader), SF_HEAD /*| SF_CLIENT*/, 8);
+
+	RePak::RegisterDescriptor(subhdrinfo.index, 0);
+
+	if (mapEntry.HasMember("kvp")) // KVP Buffer Size
+	{
+		if (mapEntry["kvp"].IsUint64() && mapEntry["kvp"].GetUint64() != 0)
+			hdr->KvpBufferSize = mapEntry["kvp"].GetUint64();
+
+		else Error("Required field 'layout' has to be type 'Uint64' for settings item. Exiting...\n");
+	} else hdr->KvpBufferSize = 0x1024 + (0x8 * assetEntries->size());
+
 	if (mapEntry.HasMember("layout")) // layout guid
 	{
 		if (mapEntry["layout"].IsString() && mapEntry["layout"].GetStdString() != "")
@@ -207,29 +220,20 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 	}
 	else Error("Required field 'layout' not found for settings item. Exiting...\n");
 
-	if (mapEntry.HasMember("kvp")) // KVP Buffer Size
-	{
-		if (mapEntry["kvp"].IsUint64() && mapEntry["kvp"].GetUint64() != 0)
-			hdr->KvpBufferSize = mapEntry["kvp"].GetUint64();
-
-		else Error("Required field 'layout' has to be type 'Uint64' for settings item. Exiting...\n");
-	} else hdr->KvpBufferSize = 0x1024 + (0x8 * assetEntries->size());
-
-
-	//header
-	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(SettingsHeader), SF_HEAD /*| SF_CLIENT*/, 8);
+	RePak::RegisterGuidDescriptor(subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
 
 	uint32_t nameBufSize = sAssetName.length() + 1;
 	_vseginfo_t nameinfo = RePak::CreateNewSegment(nameBufSize, SF_CPU, assetPathSize % 4);
 	char* nameData = new char[nameBufSize];
 	{
 		snprintf(nameData, sAssetName.length() + 1, "%s", sAssetName.c_str());
-		RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Name));
 		hdr->Name = { nameinfo.index, 0 };
 	}
 
+
 	size_t ValueBufferSize = 0;
 	size_t StringBufferSize = 0;
+
 
 	// build buffers
 	for (auto& it : mapEntry["items"].GetArray())
@@ -239,16 +243,22 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	// item data
 	_vseginfo_t valueinfo = RePak::CreateNewSegment(ValueBufferSize, SF_CPU, 8, 64);
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Values));
+
+	// string buffer data
+	_vseginfo_t stringbufinfo = RePak::CreateNewSegment(StringBufferSize, SF_CPU, 8, 64);
+
 
 	hdr->Values = { valueinfo.index , 0 };
 	char* ValueBufferData = new char[ValueBufferSize];
 
-	// string buffer data
-	_vseginfo_t stringbufinfo = RePak::CreateNewSegment(StringBufferSize, SF_CPU, 8, 64);
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, StringBuf));
 	hdr->StringBuf = { stringbufinfo.index , 0 };
 	char* StringBufferData = new char[StringBufferSize];
+
+
+	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Name));
+	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Values));
+	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, StringBuf));
+
 
 	size_t StringBufferOffset = 0;
 	size_t ValueBufferOffset = 0;
@@ -365,9 +375,10 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 			default:
 				Error("Unknown Item Type Found in Settings asset Exiting...\n");
 			}
+
+			RePak::RegisterDescriptor(valueinfo.index, ValueBufferOffset);
 		}
 	}
-
 
 	Debug("Unk1: %d / 0x%llX\n", hdr->Unk1, hdr->Unk1);
 	Debug("kvp: %d / 0x%llX\n", hdr->KvpBufferSize, hdr->KvpBufferSize);
@@ -379,13 +390,13 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::STGS);
-	asset.m_nVersion = 1;
-	asset.unk1 = 1;
+	asset.m_nVersion = 2;
+	asset.unk1 = 2;
 
 	asset.m_nPageEnd = stringbufinfo.index + 1; // number of the highest page that the asset references pageidx + 1
 
 	asset.m_nUsesStartIdx = 0;
-	asset.m_nUsesCount = 1; 
+	asset.m_nUsesCount = 0;
 
 	// add the asset entry
 	assetEntries->push_back(asset);
