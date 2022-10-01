@@ -21,6 +21,8 @@ namespace Assets
 	void AddPatchAsset(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 	void AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 	void AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
+	void AddSettingsLayoutAsset(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
+	void AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 
 	extern std::string g_sAssetsDir;
 	extern std::vector<std::string> g_vsStarpakPaths;
