@@ -10,7 +10,7 @@ void Assets::AddModelAsset_stub(std::vector<RPakAssetEntry>* assetEntries, const
 void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
     Log("\n==============================\n");
-    Log("Asset dtbl -> '%s'\n", assetPath);
+    Log("Asset mdl_ -> '%s'\n", assetPath);
 
     std::string sAssetName = assetPath;
 
@@ -34,6 +34,7 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
     skelInput.open(rmdlFilePath, BinaryIOMode::Read);
 
     studiohdr_t mdlhdr = skelInput.read<studiohdr_t>();
+
 
     if (mdlhdr.id != 0x54534449) // "IDST"
     {
@@ -132,6 +133,31 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
         }
     }
 
+    char* pAnimSeqBuf = nullptr;
+
+    if (mapEntry.HasMember("animseqs") && mapEntry["animseqs"].IsArray())
+    {
+        pHdr->animSeqCount = mapEntry["animseqs"].Size();
+
+        pAnimSeqBuf = new char[mapEntry["animseqs"].Size() * sizeof(uint64_t)];
+
+        rmem aseqBuf(pAnimSeqBuf);
+
+        for (auto& it : mapEntry["animseqs"].GetArray())
+        {
+            if (it.IsString())
+            {
+                std::string seq = it.GetStdString();
+
+                aseqBuf.write<uint64_t>(RTech::StringToGuid(seq.c_str()));
+
+            }
+            else {
+                Error("invalid animseq entry for model '%s'\n", assetPath);
+            }
+        }
+    }
+
     //
     // Starpak
     //
@@ -163,6 +189,10 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
     if (pAnimRigBuf)
         arigseginfo = RePak::CreateNewSegment(pHdr->animRigCount * 8, SF_CPU, 64);
 
+    _vseginfo_t aseqseginfo;
+    if (pAnimSeqBuf)
+        aseqseginfo = RePak::CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
+
     pHdr->pName = { dataseginfo.index, 0 };
 
     pHdr->pRMDL = { dataseginfo.index, fileNameDataSize };
@@ -190,22 +220,67 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
         }
     }
 
+    if (pAnimSeqBuf)
+    {
+        pHdr->pAnimSeqs = { aseqseginfo.index, 0 };
+
+        RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pAnimSeqs));
+
+        for (int i = 0; i < pHdr->animSeqCount; ++i)
+        {
+            RePak::RegisterGuidDescriptor(aseqseginfo.index, sizeof(uint64_t) * i);
+        }
+    }
+
     rmem dataBuf(pDataBuf);
     dataBuf.seek(fileNameDataSize + mdlhdr.textureindex, rseekdir::beg);
 
+    //while (!IsDebuggerPresent())
+    //    ::Sleep(100);
+
     // register guid relations on each of the model's material guids
+
+    std::vector<uint64_t> MaterialOverrides;
+
+    if (mapEntry.HasMember("materials"))
+    {
+        for (auto& it : mapEntry["materials"].GetArray())
+        {
+            if (it.IsString())
+            {
+                if (it.GetStdString() == "default")
+                    MaterialOverrides.push_back(-1);
+                else if (it.GetStdString() == "")
+                    MaterialOverrides.push_back(RTech::StringToGuid("material/models/Weapons_R2/wingman_elite/wingman_elite_sknp.rpak"));
+                else
+                    MaterialOverrides.push_back(RTech::StringToGuid(("material/" + it.GetStdString() + ".rpak").c_str()));
+                    
+            }
+            else if (it.IsUint64() && it.GetUint64() != 0x0)
+            {
+                MaterialOverrides.push_back(it.GetUint64());
+            }
+        }
+    }
+
+    Log("Materials -> %d\n", mdlhdr.numtextures);
+
     for (int i = 0; i < mdlhdr.numtextures; ++i)
     {
         dataBuf.seek(fileNameDataSize + mdlhdr.textureindex + (i * sizeof(materialref_t)), rseekdir::beg);
 
         materialref_t* material = dataBuf.get<materialref_t>();
 
-        //// temp material fix
-        //if (material->guid != 0)
-        //    material->guid = 0x15ba3e223a795c19;
+        if (material->guid != 0 && MaterialOverrides.size() != 0 && i <= MaterialOverrides.size())
+        {
+            if (MaterialOverrides[i] != -1)
+                material->guid = MaterialOverrides[i];
+        }
+
+        Log("Material Guid -> 0x%llX\n", material->guid);
 
         if(material->guid != 0)
-            RePak::RegisterGuidDescriptor(dataseginfo.index, dataBuf.getPosition()+ offsetof(materialref_t, guid));
+            RePak::RegisterGuidDescriptor(dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
     }
 
     RPakRawDataBlock shdb{ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr };
@@ -230,8 +305,15 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
         lastPageIdx = arigseginfo.index;
     }
 
-    RPakAssetEntry asset;
 
+    if (pAnimSeqBuf)
+    {
+        RPakRawDataBlock aseqdb{ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf };
+        RePak::AddRawDataBlock(aseqdb);
+        lastPageIdx = aseqseginfo.index;
+    }
+
+    RPakAssetEntry asset;
     asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, de.m_nOffset, -1, (std::uint32_t)AssetType::RMDL);
     asset.m_nVersion = RMDL_VERSION;
     // i have literally no idea what these are
@@ -240,7 +322,7 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 
     size_t fileRelationIdx = RePak::AddFileRelation(assetEntries->size());
     asset.m_nUsesStartIdx = fileRelationIdx;
-    asset.m_nUsesCount = mdlhdr.numtextures + pHdr->animRigCount;
+    asset.m_nUsesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
 
     assetEntries->push_back(asset);
 }

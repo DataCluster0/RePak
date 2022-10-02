@@ -5,7 +5,7 @@
 
 void Assets::AddTextureAsset_v8(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
-    Log("==============================\n");
+    Log("\n==============================\n");
     Log("Asset txtr -> '%s'\n", assetPath);
 
     std::string filePath = g_sAssetsDir + assetPath + ".dds";
@@ -89,7 +89,7 @@ void Assets::AddTextureAsset_v8(std::vector<RPakAssetEntry>* assetEntries, const
         switch (ddsh.ddspf.dwFourCC)
         {
         case '1TXD': // DXT1
-            dxgiFormat = DXGI_FORMAT_BC1_UNORM;
+            dxgiFormat = DXGI_FORMAT_BC1_UNORM_SRGB;
             break;
         case '3TXD': // DXT3
             dxgiFormat = DXGI_FORMAT_BC2_UNORM;
@@ -141,10 +141,10 @@ void Assets::AddTextureAsset_v8(std::vector<RPakAssetEntry>* assetEntries, const
             break;
         default:
             dxgiFormat = dxutils::GetFormatFromHeader(ddsh);
-            
+
             if(dxgiFormat == DXGI_FORMAT_UNKNOWN)
                 Error("Attempted to add txtr asset '%s' that was not using a supported DDS type. Exiting...\n", assetPath);
-            
+
             return;
         }
 

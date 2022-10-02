@@ -2,6 +2,19 @@
 
 #include <d3d11.h>
 
+struct Vector2
+{
+	float x, y;
+
+	Vector2(float x, float y) {
+		this->x = x;
+		this->y = y;
+	}
+
+	Vector2() {};
+};
+
+
 struct Vector3
 {
 	float x, y, z;
@@ -217,12 +230,23 @@ struct SRPkDataEntry
 
 enum class AssetType : uint32_t
 {
-	TEXTURE = 0x72747874, // b'txtr' - texture
-	RMDL = 0x5f6c646d,    // b'mdl_' - model
-	UIMG = 0x676d6975,    // b'uimg' - ui image atlas
-	PTCH = 0x68637450,	  // b'Ptch' - patch
-	DTBL = 0x6c627464,    // b'dtbl' - datatable
-	MATL = 0x6c74616d,    // b'matl' - material
+	RMDL = '_ldm', // mdl_ - 0x5F6C646D
+	TEXTURE = 'rtxt', // txtr - 0x72747874
+	TEXTUREANIM = 'naxt', // txan - 0x6e617874
+	UIIA = 'aiiu', // uiia - 0x61696975
+	DTBL = 'lbtd', // dtbl - 0x6C627464
+	STGS = 'sgts', // stgs - 0x73677473
+	STLT = 'tlts', // stlt - 0x746c7473
+	MATL = 'ltam', // matl - 0x6C74616D
+	ARIG = 'gira', // arig - 0x67697261
+	ASEQ = 'qesa', // aseq - 0x71657361
+	SUBT = 'tbus', // subt - 0x74627573
+	SHDS = 'sdhs', // shds - 0x73646873
+	SHDR = 'rdhs', // shdr - 0x72646873
+	UIMG = 'gmiu', // uimg - 0x676D6975
+	RSON = 'nosr', // rson - 0x72736F6E
+	PTCH = 'hctp',  // Ptch - 0x68637450
+	UI = 'iu' // ui - 0x75690000
 };
 
 // identifies the data type for each column in a datatable asset
@@ -380,6 +404,23 @@ struct PtchHeader
 
 	RPakPtr pPakPatchNums;
 };
+
+// --- arig ---
+struct AnimRigHeader
+{
+	RPakPtr pSkeleton{};
+
+	RPakPtr pName{};
+
+	uint32_t Unk1;
+	uint32_t AseqRefCount;
+
+	RPakPtr pAseqRefs{};
+
+	uint32_t Unk2;
+	uint32_t Unk3;
+};
+
 
 // size: 0x78 (120 bytes)
 struct ModelHeader
@@ -626,6 +667,30 @@ struct BasicRMDLVGHeader
 	uint32_t version;
 };
 
+struct RMDLVTXHeader
+{
+	// file version as defined by OPTIMIZED_MODEL_FILE_VERSION (currently 7)
+	int version;
+
+	// hardware params that affect how the model is to be optimized.
+	int vertCacheSize;
+	uint16_t maxBonesPerStrip;
+	uint16_t maxBonesPerTri;
+	int maxBonesPerVert;
+
+	// must match checkSum in the .mdl
+	int checksum;
+
+	int numLODs; // Also specified in ModelHeader_t's and should match
+
+	// Offset to materialReplacementList Array. one of these for each LOD, 8 in total
+	int materialReplacementListOffset;
+
+	// Defines the size and location of the body part array
+	int numBodyParts;
+	int bodyPartOffset;
+};
+
 // the following two structs are found in the ""cpu data"", they are very much alike to what you would use in normal source materials.
 // apex probably has these and more stuff.
 struct MaterialTextureTransformMatrix
@@ -659,50 +724,84 @@ struct UnknownMaterialSectionV15
 };
 
 // this is currently unused, but could probably be used just fine if you copy stuff over from the RPak V7 material function in material.cpp
-struct MaterialCPUDataV15
-{	
-	// hard to test this but I'm pretty sure that's where it is.
-	MaterialTextureTransformMatrix DetailTransform[1]; // detail texture transform matrix
+enum class SettingsFieldType : uint16_t
+{
+	Bool,
+	Int,
+	Float,
+	Float2,
+	Float3,
+	String,
+	Asset,
+	Asset2,
+	Array,
+	Array2,
+};
 
-	// SelfIllumTint NEEDS to be found.
-	// this has lots of similar bits to the V12 version but I cba to actually dig into it.
-	// the top section has as few MaterialTextureTransformMatrix for sure, the section is probably comprised of floats as well.
-	uint8_t testData[520] = {
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0xAB, 0xAA, 0x2A, 0x3E, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x1C, 0x46, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00,
-		0x81, 0x95, 0xE3, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x3F, 0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0xDE, 0x88, 0x1B, 0x3D, 0xDE, 0x88, 0x1B, 0x3D, 0xDE, 0x88, 0x1B, 0x3D,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-	};
+// --- stgs ---
+struct SettingsHeader
+{
+	uint64_t LayoutGUID;
 
+	RPakPtr Values{};
+
+	RPakPtr Name{};
+
+	RPakPtr StringBuf{};
+
+	uint64_t Unk1;
+
+	RPakPtr ModNames{};
+
+	RPakPtr Unk2{};
+
+	uint32_t KvpBufferSize = 0x60;
+
+	uint64_t Unk3;
+	uint32_t Unk4;
+};
+
+struct SettingsKeyValue
+{
+	uint32_t BlockIndex;
+	uint32_t BlockOffset;
+};
+
+struct SettingsKeyValuePair
+{
+	SettingsKeyValue Key;
+	SettingsKeyValue Value;
+};
+
+struct SettingsLayoutHeader
+{
+	RPakPtr pName{};
+	RPakPtr pItems{};
+	RPakPtr unk2{};
+	uint32_t unk3 = 0;
+	uint32_t itemsCount = 0;
+	uint32_t unk4 = 0;
+	uint32_t unk5 = 0;
+	uint32_t unk6 = 0;
+	uint32_t unk7 = 0;
+	uint32_t unk8 = 0;
+	uint32_t unk9 = 0;
+	RPakPtr pStringBuf{};
+	RPakPtr unk11{};
+};
+
+struct SettingsLayoutItem
+{
+	SettingsFieldType type = SettingsFieldType::String;
+	uint16_t NameOffset; // offset from start of stgs value buffer
+	uint32_t ValueOffset;
+};
+
+struct SettingsLayout
+{
+	std::string name;
+	unsigned int itemsCount;
+	std::vector<SettingsLayoutItem> items;
 };
 
 // start of CMaterialGlue class
@@ -767,26 +866,24 @@ struct UnknownMaterialSectionV12
 	uint16_t FaceDrawingFlags = 0x0006; // how the face is drawn, culling, wireframe, etc.
 
 	uint64_t Padding;
-	
+
 	/*VisibilityFlags
 	0x0000 unknown
 	0x0001 inverted ignorez
 	0x0002 required when ignorez is enabled, why?
 	0x0004 unknown but used in most opaque materials, not required.
-	0x0008 
+	0x0008
 	0x0010 seems to toggle transparency, will draw opaque if inverted ignorez is enabled
-
 	0x0017 used for most normal materials.
 	0x0007 used for glass which makes me think 0x0010 is for translucency.
 	0x0013 is vaild and looks like a normal opaque material.  */
-	
+
 	/*FlagDrawingFlags Flags
 	0x0000 culling this is the same as 0x0002??? maybe the default?
 	0x0001 wireframe
 	0x0002 normal texture drawing aka culling (front side and backside drawn).
 	0x0004 inverted faces
 	0x0008 if this exists I can't tell what it is.
-
 	to get the equalivilent to 'nocull' both 'culling' and 'inverted faces' need to be enabled, see: why most matls have '0x06'.  */
 
 };
@@ -817,11 +914,11 @@ struct MaterialCPUDataV12
 
 	// these are (more) vector4s for rgba I would think.
 	uint8_t UnkData2[12 * 4] = {
-	0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x3F, 
-	0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x80, 0x3F, 0xFF, 0xFF, 0xFF, 0xFF, 
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-	0x00, 0x00, 0x80, 0x3F, 0x8F, 0xC2, 0xF5, 0x3C, 
+	0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x3F,
+	0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x80, 0x3F, 0xFF, 0xFF, 0xFF, 0xFF,
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x80, 0x3F, 0x8F, 0xC2, 0xF5, 0x3C,
 	0x8F, 0xC2, 0xF5, 0x3C, 0x8F, 0xC2, 0xF5, 0x3C
 	};
 	// this is actually floats but i cba to type all this default data in 
@@ -886,6 +983,104 @@ struct MaterialCPUHeader
 	RPakPtr  m_nUnknownRPtr{}; // points to the rest of the cpu data. maybe for colour?
 	uint32_t m_nDataSize = 0;
 	uint32_t m_nVersionMaybe = 3; // every unknown is now either datasize, version, or flags
+};
+
+struct UVTransformMatrix
+{
+	Vector2 c_uvRotScaleX = { 1.000000, 0.000000 };
+	Vector2 c_uvRotScaleY = { -0.000000, 1.000000 };
+	Vector2 c_uvTranslate = { 0.000000, 0.000000 };
+};
+
+struct MaterialCPUData
+{
+
+	UVTransformMatrix uv1;
+	UVTransformMatrix uv2;
+	UVTransformMatrix uv3;
+	UVTransformMatrix uv4;
+	UVTransformMatrix uv5;
+
+	Vector2 c_uvDistortionIntensity = { 1.000000, 1.000000 };
+	Vector2 c_uvDistortion2Intensity = { 1.000000, 1.000000 };
+
+	float c_L0_scatterDistanceScale = 0.166667;
+	float c_layerBlendRamp = 0.000000;
+	float c_opacity = 1.000000;
+	float c_useAlphaModulateSpecular = 0.000000;
+	float c_alphaEdgeFadeExponent = 0.000000;
+	float c_alphaEdgeFadeInner = 0.000000;
+	float c_alphaEdgeFadeOuter = 0.000000;
+	float c_useAlphaModulateEmissive = 1.000000;
+	float c_emissiveEdgeFadeExponent = 0.000000;
+	float c_emissiveEdgeFadeInner = 0.000000;
+	float c_emissiveEdgeFadeOuter = 0.000000;
+	float c_alphaDistanceFadeScale = 10000.000000;
+	float c_alphaDistanceFadeBias = -0.000000;
+	float c_alphaTestReference = 0.000000;
+	float c_aspectRatioMulV = 1.778000;
+	float c_shadowBias = 0.000000;
+	float c_shadowBiasStatic = 0.000000;
+	float c_dofOpacityLuminanceScale = 1.000000;
+	float c_tsaaDepthAlphaThreshold = 0.000000;
+	float c_tsaaMotionAlphaThreshold = 0.900000;
+	float c_tsaaMotionAlphaRamp = 10.000000;
+	uint32_t c_tsaaResponsiveFlag = 0x0;
+	Vector3 c_outlineColorSDF = { 0.000000, 0.000000, 0.000000 };
+	float c_outlineWidthSDF = 0.000000;
+	Vector3 c_shadowColorSDF = { 0.000000, 0.000000, 0.000000 };
+	float c_shadowWidthSDF = 0.000000;
+	Vector3 c_insideColorSDF = { 0.000000, 0.000000, 0.000000 };
+	float c_outsideAlphaScalarSDF = 0.000000;
+	float c_glitchStrength = 0.000000;
+	float c_vertexDisplacementScale = 0.000000;
+	float c_innerFalloffWidthSDF = 0.000000;
+	float c_innerEdgeOffsetSDF = 0.000000;
+	Vector2 c_dropShadowOffsetSDF = { 0.000000, 0.000000 };
+	float c_normalMapEdgeWidthSDF = 0.000000;
+	float c_shadowFalloffSDF = 0.000000;
+	Vector3 c_L0_scatterAmount = { 0.000000, 0.000000, 0.000000 };
+	float c_L0_scatterRatio = 0.000000;
+	float c_L0_transmittanceIntensityScale = 1.000000;
+	Vector3 c_vertexDisplacementDirection = { 0.000000, 0.000000, 0.000000 };
+	float c_L0_transmittanceAmount = 0.000000;
+	float c_L0_transmittanceDistortionAmount = 0.500000;
+	float c_zUpBlendingMinAngleCos = 1.000000;
+	float c_zUpBlendingMaxAngleCos = 1.000000;
+	float c_zUpBlendingVertexAlpha = 0.000000;
+	Vector3 c_L0_albedoTint = { 1.000000, 1.000000, 1.000000 };
+	float c_depthBlendScalar = 1.000000;
+	Vector3 c_L0_emissiveTint = { 0.000000, 0.000000, 0.000000 };
+	uint32_t c_subsurfaceMaterialID;
+	Vector3 c_L0_perfSpecColor = { 0.037972, 0.037972, 0.037972 };
+	float c_L0_perfGloss = 1.000000;
+	Vector3 c_L1_albedoTint = { 0.000000, 0.000000, 0.000000 };
+	float c_L1_perfGloss = 0.000000;
+	Vector3 c_L1_emissiveTint = { 0.000000, 0.000000, 0.000000 };
+	Vector3 c_L1_perfSpecColor = { 0.000000, 0.000000, 0.000000 };
+	float c_splineMinPixelPercent = 0.000000;
+	Vector2 c_L0_anisoSpecCosSinTheta = { 1.000000, 0.000000 };
+	Vector2 c_L1_anisoSpecCosSinTheta = { 1.000000, 0.000000 };
+	float c_L0_anisoSpecStretchAmount = 0.000000;
+	float c_L1_anisoSpecStretchAmount = 0.000000;
+	float c_L0_emissiveHeightFalloff = 0.000000;
+	float c_L1_emissiveHeightFalloff = 0.000000;
+	float c_L1_transmittanceIntensityScale = 0.000000;
+	float c_L1_transmittanceAmount = 0.000000;
+	float c_L1_transmittanceDistortionAmount = 0.000000;
+	float c_L1_scatterDistanceScale = 0.000000;
+	Vector3 c_L1_scatterAmount = { 0.000000, 0.000000, 0.000000 };
+	float c_L1_scatterRatio = 0.000000;
+};
+
+#pragma pack(pop)
+
+// internal data structure for storing patch_master entries before being written
+struct PtchEntry
+{
+	std::string FileName = "";
+	uint8_t PatchNum = 0;
+	uint32_t FileNamePageOffset = 0;
 };
 
 #pragma pack(pop)

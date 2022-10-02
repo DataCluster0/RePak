@@ -148,11 +148,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Assets.cpp" />
+    <ClCompile Include="src\assets\animation.cpp" />
     <ClCompile Include="src\assets\datatable.cpp" />
     <ClCompile Include="src\assets\material.cpp" />
     <ClCompile Include="src\assets\model.cpp" />
     <ClCompile Include="src\assets\patch.cpp" />
     <ClCompile Include="src\assets\rui.cpp" />
+    <ClCompile Include="src\assets\settings.cpp" />
     <ClCompile Include="src\assets\texture.cpp" />
     <ClCompile Include="src\components\starpak.cpp" />
     <ClCompile Include="src\pch.cpp">

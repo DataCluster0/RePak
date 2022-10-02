@@ -53,6 +53,9 @@ public:
 		ASSET_HANDLER("dtbl", file, assets, Assets::AddDataTableAsset_v0, Assets::AddDataTableAsset_v1);
 		ASSET_HANDLER("rmdl", file, assets, Assets::AddModelAsset_stub, Assets::AddModelAsset_v9);
 		ASSET_HANDLER("matl", file, assets, Assets::AddMaterialAsset_v12, Assets::AddMaterialAsset_v15);
+		//ASSET_HANDLER("stlt", file, assets, Assets::AddSettingsLayoutAsset, Assets::AddSettingsLayoutAsset);
+		ASSET_HANDLER("stgs", file, assets, Assets::AddSettingsAsset, Assets::AddSettingsAsset);
+		ASSET_HANDLER("arig", file, assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
 	};
 
 	virtual size_t GetAssetCount() { return assets.size(); };
