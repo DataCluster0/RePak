@@ -1083,16 +1083,6 @@ struct PtchEntry
 	uint32_t FileNamePageOffset = 0;
 };
 
-#pragma pack(pop)
-
-// internal data structure for storing patch_master entries before being written
-struct PtchEntry
-{
-	std::string FileName = "";
-	uint8_t PatchNum = 0;
-	uint32_t FileNamePageOffset = 0;
-};
-
 // map of dxgi format to the corresponding txtr asset format value
 static std::map<DXGI_FORMAT, uint16_t> s_txtrFormatMap{
 	{ DXGI_FORMAT_BC1_UNORM, 0 },
