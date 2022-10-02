@@ -271,7 +271,7 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 
         materialref_t* material = dataBuf.get<materialref_t>();
 
-        if (material->guid != 0 && MaterialOverrides.size() != 0 && i <= MaterialOverrides.size())
+        if (material->guid != 0 && MaterialOverrides.size() != 0 && i < MaterialOverrides.size() + 1)
         {
             if (MaterialOverrides[i] != -1)
                 material->guid = MaterialOverrides[i];
