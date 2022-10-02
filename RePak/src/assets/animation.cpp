@@ -98,12 +98,6 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(AnimRigHeader, pSkeleton));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(AnimRigHeader, pAseqRefs));
 
-	for (int i = 0; i < pHdr->AseqRefCount; ++i)
-	{
-		RePak::RegisterGuidDescriptor(dataseginfo.index, SegmentOffset);
-		SegmentOffset += i * 8;
-	}
-
 	RePak::AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
 	RePak::AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
 
@@ -113,8 +107,6 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 	// i have literally no idea what these are
 	asset.m_nPageEnd = dataseginfo.index + 1;
 	asset.unk1 = 2;
-
-	asset.m_nUsesCount = pHdr->AseqRefCount;
 
 	assetEntries->push_back(asset);
 }
