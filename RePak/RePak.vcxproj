@@ -157,13 +157,17 @@
     <ClCompile Include="src\assets\settings.cpp" />
     <ClCompile Include="src\assets\texture.cpp" />
     <ClCompile Include="src\components\starpak.cpp" />
+    <ClCompile Include="src\math\Half.cpp" />
+    <ClCompile Include="src\math\Matrix.cpp" />
+    <ClCompile Include="src\math\Quaternion.cpp" />
+    <ClCompile Include="src\math\Vector2.cpp" />
+    <ClCompile Include="src\math\Vector3.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="src\Quaternion.cpp" />
     <ClCompile Include="src\RePak.cpp" />
     <ClCompile Include="src\rmem.cpp" />
     <ClCompile Include="src\rtech.cpp" />
@@ -182,8 +186,13 @@
     <ClInclude Include="include\assets\texture.h" />
     <ClInclude Include="include\BinaryIO.h" />
     <ClInclude Include="include\dxutils.h" />
+    <ClInclude Include="include\math\Half.h" />
+    <ClInclude Include="include\math\MathHelper.h" />
+    <ClInclude Include="include\math\Matrix.h" />
+    <ClInclude Include="include\math\Quaternion.h" />
+    <ClInclude Include="include\math\Vector2.h" />
+    <ClInclude Include="include\math\Vector3.h" />
     <ClInclude Include="include\pch.h" />
-    <ClInclude Include="include\Quaternion.h" />
     <ClInclude Include="include\rapidcsv\rapidcsv.h" />
     <ClInclude Include="include\rapidjson\allocators.h" />
     <ClInclude Include="include\rapidjson\cursorstreamwrapper.h" />

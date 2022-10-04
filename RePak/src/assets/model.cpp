@@ -235,9 +235,6 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	rmem dataBuf(pDataBuf);
 	dataBuf.seek(fileNameDataSize + mdlhdr.textureindex, rseekdir::beg);
 
-	//while (!IsDebuggerPresent())
-	//    ::Sleep(100);
-
 	// register guid relations on each of the model's material guids
 
 	std::vector<uint64_t> MaterialOverrides;

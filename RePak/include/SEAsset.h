@@ -3,12 +3,12 @@
 #include <cstdint>
 #include <string>
 
-static class SEAsset
+class SEAsset
 {
 public:
 
 	// Specifies how the data is interpreted by the importer
-	enum SEAnim_AnimationType
+	enum SEAnim_AnimationType : uint8_t
 	{
 		// Animation translations are set to this exact value each frame
 		SEANIM_TYPE_ABSOLUTE,
@@ -21,7 +21,7 @@ public:
 	};
 
 	// Specifies the data present for each frame of every bone
-	enum SEAnim_DataPresenceFlags
+	enum SEAnim_DataPresenceFlags : uint8_t
 	{
 		// These describe what type of keyframe data is present for the bones
 		SEANIM_BONE_LOC = 1 << 0,
@@ -37,12 +37,13 @@ public:
 		SEANIM_PRESENCE_CUSTOM = 1 << 7,
 	};
 
-	enum SEAnim_BoneFlags {
+	enum SEAnim_BoneFlags : uint8_t
+	{
 		SEANIM_BONE_NORMAL = 0,
 		SEANIM_BONE_COSMETIC = 1 << 0
 	};
 
-	enum SEAnim_PropertyFlags
+	enum SEAnim_PropertyFlags : uint8_t
 	{
 		SEANIM_PRECISION_HIGH = 1 << 0 // Use double precision floating point vectors instead of single precision
 		//RESERVED_1		= 1 << 1, // ALWAYS FALSE
@@ -54,7 +55,7 @@ public:
 		//RESERVED_7		= 1 << 7, // ALWAYS FALSE
 	};
 
-	enum SEAnim_Flags
+	enum SEAnim_Flags : uint8_t
 	{
 		SEANIM_LOOPED = 1 << 0, // The animation is a looping animation
 								//RESERVED_0		= 1 << 1, // ALWAYS FALSE
@@ -69,7 +70,7 @@ public:
 	typedef struct SEAnim_BoneAnimModifier_s
 	{
 		uint32_t index; // Index of the bone
-		uint8_t animTypeOverride; // AnimType to use for that bone, and its children recursively
+		SEAnim_AnimationType animTypeOverride; // AnimType to use for that bone, and its children recursively
 	} SEAnim_BoneAnimModifier_t;
 
 	typedef struct SEAnim_BoneLocData_s
@@ -99,23 +100,22 @@ public:
 		char* name;
 	} SEAnim_Note_t;
 
-
 	typedef struct SEAnim_Header_s
 	{
 		// Contains the size of the header block in bytes, any extra data is ignored
 		uint16_t headerSize; //currently 0x1C
 
 		// The type of animation data that is stored, matches an SEANIM_TYPE
-		uint8_t animType;
+		SEAnim_AnimationType animType;
 
 		// Bitwise flags that define the properties for the animation itself
-		uint8_t animFlags;
+		SEAnim_Flags animFlags;
 
 		// Bitwise flags that define which data blocks are present, and properties for those data blocks
-		uint8_t dataPresenceFlags;
+		SEAnim_DataPresenceFlags dataPresenceFlags;
 
 		// Bitwise flags containing property information pertaining regarding the data in the file
-		uint8_t dataPropertyFlags;
+		SEAnim_PropertyFlags dataPropertyFlags;
 
 		// RESERVED - Should be 0
 		uint8_t reserved1[2];
@@ -133,30 +133,29 @@ public:
 		uint32_t boneCount;
 		uint8_t boneAnimModifierCount; // The number of animType modifier bones
 
-									   // RESERVED - Should be 0
 		uint8_t reserved2[3];
 
 		// Is 0 if ( presenceFlags & SEANIM_PRESENCE_NOTE ) is false
 		uint32_t noteCount;
 	} SEAnim_Header_t;
 
-	typedef struct SEAnim_BasicFile
+	struct SEAnim_BasicFile
 	{
 		char magic[6];		// 'SEAnim'
 		uint16_t version;	// The file version - the current version is 0x1
 		SEAnim_Header_t header;
 	};
 
-	typedef struct SEAnim_BoneData
+	struct SEAnim_BoneData
 	{
-		uint8_t flags;
+		SEAnim_BoneFlags flags;
 
 		std::vector<SEAnim_BoneLocData_t> cords{};
 		std::vector<SEAnim_BoneRotData_t> quats{};
 		std::vector<SEAnim_BoneScaleData_t> scales{};
 	};
 
-	typedef struct SEAnim_Bone
+	struct SEAnim_Bone
 	{
 		std::string Bone;
 		SEAnim_BoneAnimModifier_t BoneModifier;
@@ -187,9 +186,8 @@ public:
 
 	static SEAnim_File_Ext* ReadAnimation(const std::string& Path, const std::string& AssetName);
 
-	static uint32_t CalculateRead(BinaryIO& Reader, uint32_t Count);
+	static uint32_t SizeRead(BinaryIO& Reader, uint32_t Count);
 
 	// Gets the file extension for this exporters animation format.
 	static std::string AnimationExtension();
-
 };

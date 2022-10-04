@@ -911,10 +911,12 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	asset.m_nVersion = MATL_VERSION;
 
 	asset.m_nPageEnd = cpuseginfo.index + 1;
-	asset.unk1 = bColpass ? 7 : 8; // what
+
 
 	asset.m_nUsesStartIdx = fileRelationIdx;
 	asset.m_nUsesCount = assetUsesCount;
+
+	asset.unk1 = asset.m_nUsesCount + 1;
 
 	assetEntries->push_back(asset);
 }

@@ -15,7 +15,14 @@
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 
-#include <Quaternion.h>
+#include <math/MathHelper.h>
+#include <math/Half.h>
+#include <math/Matrix.h>
+#include <math/Quaternion.h>
+#include <math/Vector2.h>
+#include <math/Vector3.h>
+
+using namespace Math;
 
 #include "rmem.h"
 #include "rpak.h"

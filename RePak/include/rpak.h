@@ -3,80 +3,6 @@
 #include <d3d11.h>
 #include <pch.h>
 
-// The value of PI, a constant
-constexpr static double PI = 3.14159265358979323846;
-// The value of PI * 2, a constant
-constexpr static double PI2 = (PI * 2);
-// The epsilon value for comparisions
-constexpr static double Epsilon = 4.37114e-05;
-
-constexpr static float DegreesToRadians(float Value)
-{
-	return (float)((Value * PI) / 180.0f);
-}
-// Converts the input radians to degree units
-constexpr static float RadiansToDegrees(float Value)
-{
-	return (float)(((Value * 180.0f) / PI));
-}
-
-template <typename T>
-// Clamp a number between two bounds
-constexpr static T Clamp(const T& Value, const T& Lower, const T& Upper)
-{
-	// Clamp it
-	return max(Lower, min(Value, Upper));
-}
-
-struct Vector2
-{
-	float x, y;
-
-	Vector2(float x, float y) {
-		this->x = x;
-		this->y = y;
-	}
-
-	Vector2() {};
-};
-
-struct Vector3
-{
-	float x, y, z;
-
-	Vector3(float x, float y, float z) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-	}
-
-	Vector3 Lerp(float Factor, const Vector3& Rhs) const
-	{
-		auto Value = Vector3(Rhs.x - x, Rhs.y - y, Rhs.z - z);
-		Value = Vector3(x * Factor, y * Factor, z * Factor);
-		Value = Vector3(x + Value.x, y + Value.y, z + Value.z);
-
-		return Value;
-	}
-
-	Vector3() {};
-};
-
-//I think this implementation is better than what 'TintVec4' was before..
-struct Vector4
-{
-	float r, g, b, a;
-
-	Vector4(float r, float g, float b, float a) {
-		this->r = r;
-		this->g = g;
-		this->b = b;
-		this->a = a;
-	}
-
-	Vector4() {};
-};
-
 #pragma pack(push, 1)
 
 #define SF_HEAD   0 // :skull:
@@ -254,7 +180,7 @@ struct RPakAssetEntry
 	uint64_t m_nOptStarpakOffset = -1;
 
 	uint16_t m_nPageEnd = 0; // highest mem page used by this asset
-	uint16_t unk1 = 0;
+	uint16_t unk1 = 1; // usually m_nUsesCount + 1
 
 	uint32_t m_nRelationsStartIdx = 0;
 

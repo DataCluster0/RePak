@@ -59,14 +59,14 @@ struct mstudioseqdesc_t
 	int szactivitynameindex;
 	int flags;
 
-	int activity;
+	enum Anim_Activity activity;
 	int actweight;
 
 	int numevents;
 	int eventindex;
 
-	float bbmin[3];
-	float bbmax[3];
+	Vector3 bbmin;
+	Vector3 bbmax;
 
 	int numblends;
 	int animindexindex;
@@ -100,33 +100,6 @@ struct mstudioanimdescv54_t
 	uint64_t SomeDataOffset;
 };
 
-struct mstudioanimdescv53_t
-{
-	uint32_t Zero;
-	uint32_t NameOffset;
-
-	float Framerate;
-
-	uint32_t Flags;
-	uint32_t FrameCount;
-
-	uint32_t Zero1;
-	uint32_t Zero2;
-
-	uint32_t UnknownOffset;
-	uint32_t FirstChunkOffset;
-
-	uint32_t UnknownCount2;
-	uint32_t UnknownOffset2;
-
-	uint32_t Zero3;
-	uint32_t Zero4;
-
-	uint32_t OffsetToChunkOffsetsTable;
-	uint32_t FrameSplitCount;
-
-	uint8_t UnknownZero[0x20];
-};
 
 struct RAnimBoneFlag
 {
@@ -153,36 +126,21 @@ struct RAnimBoneHeader
 	float TranslationScale;
 
 	uint8_t BoneIndex;
-	RAnimTitanfallBoneFlag BoneFlags;
+	RAnimBoneFlag BoneFlags;
 	uint8_t Flags2;
 	uint8_t Flags3;
 
-	union
-	{
-		struct
-		{
-			uint16_t OffsetX;
-			uint16_t OffsetY;
-			uint16_t OffsetZ;
-			uint16_t OffsetL;
-		};
-
-		uint64_t PackedRotation;
-	} RotationInfo;
-
-	uint16_t TranslationX;
-	uint16_t TranslationY;
-	uint16_t TranslationZ;
-
-	uint16_t ScaleX;
-	uint16_t ScaleY;
-	uint16_t ScaleZ;
+	Quaternion Rotation;
+	Vector3 Translation;
+	Vector3 Scale;
 
 	uint32_t DataSize;
 };
 #pragma pack(pop)
 
-enum Anim_Activity {
+enum Anim_Activity : int
+{
+	ACT_NONE = -1,
 	ACT_RESET = 0,
 	ACT_IDLE_CASUAL = 1,
 	ACT_IDLE = 2,

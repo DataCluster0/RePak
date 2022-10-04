@@ -96,7 +96,19 @@
     <ClCompile Include="src\SEAsset.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\Quaternion.cpp">
+    <ClCompile Include="src\math\Matrix.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Quaternion.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Vector2.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Vector3.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Half.cpp">
       <Filter>Source Files\math</Filter>
     </ClCompile>
   </ItemGroup>
@@ -272,7 +284,22 @@
     <ClInclude Include="include\SEAsset.h">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\Quaternion.h">
+    <ClInclude Include="include\math\Matrix.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Quaternion.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Vector2.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Vector3.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\Half.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\MathHelper.h">
       <Filter>Header Files\math</Filter>
     </ClInclude>
   </ItemGroup>

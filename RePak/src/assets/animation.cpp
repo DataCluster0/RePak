@@ -130,10 +130,10 @@ void Assets::AddRseqAssets_v7(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	std::string FilePath = g_sAssetsDir + sAssetName;
 
-	//while (!IsDebuggerPresent())
-	//	::Sleep(100);
+	while (!IsDebuggerPresent())
+		::Sleep(100);
 
-	SEAsset::ReadAnimation(FilePath, sAssetName);
+	auto SEAnimData = SEAsset::ReadAnimation(FilePath, sAssetName);
 
 	AnimHeader* pHdr = new AnimHeader();
 

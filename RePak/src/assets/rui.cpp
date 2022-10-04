@@ -204,10 +204,11 @@ void Assets::AddUIImageAsset_v10(std::vector<RPakAssetEntry>* assetEntries, cons
 	asset.m_nVersion = UIMG_VERSION;
 
 	asset.m_nPageEnd = dataseginfo.index + 1; // number of the highest page that the asset references pageidx + 1
-	asset.unk1 = 2;
+
 
 	asset.m_nUsesStartIdx = fileRelationIdx;
 	asset.m_nUsesCount = 1; // the asset should only use 1 other asset for the atlas
+	asset.unk1 = asset.m_nUsesCount + 1;
 
 	// add the asset entry
 	assetEntries->push_back(asset);
