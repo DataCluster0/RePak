@@ -28,6 +28,9 @@ struct TextureHeader
 	uint8_t  unk3[0x15];
 };
 
+#pragma pack(pop)
+
+
 // map of dxgi format to the corresponding txtr asset format value
 static std::map<DXGI_FORMAT, uint16_t> s_txtrFormatMap{
 	{ DXGI_FORMAT_BC1_UNORM, 0 },
@@ -93,4 +96,3 @@ static std::map<DXGI_FORMAT, uint16_t> s_txtrFormatMap{
 	{ DXGI_FORMAT_D32_FLOAT, 60 },
 	{ DXGI_FORMAT_D16_UNORM, 61 },
 };
-#pragma pack(pop)

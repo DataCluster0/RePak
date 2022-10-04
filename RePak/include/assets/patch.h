@@ -12,6 +12,7 @@ struct PtchHeader
 
 	RPakPtr pPakPatchNums;
 };
+#pragma pack(pop)
 
 // internal data structure for storing patch_master entries before being written
 struct PtchEntry
@@ -20,4 +21,3 @@ struct PtchEntry
 	uint8_t PatchNum = 0;
 	uint32_t FileNamePageOffset = 0;
 };
-#pragma pack(pop)

@@ -20,7 +20,7 @@
 #define STUDIO_NOFORCELOOP 0x8000	// do not force the animation loop
 #define STUDIO_EVENT_CLIENT 0x10000	// Has been updated at runtime to event index on client
 
-#pragma pack(push, 1)
+#pragma pack(push, 2)
 
 // ANIMATIONS
 // --- aseq ---

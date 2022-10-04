@@ -273,6 +273,7 @@ struct RPakAssetEntry
 	uint32_t m_nMagic = 0;
 };
 
+#pragma pack(pop)
 
 // internal data structure for referencing file data to be written
 struct RPakRawDataBlock
@@ -289,4 +290,3 @@ struct SRPkDataEntry
 	uint64_t m_nDataSize = 0;
 	uint8_t* m_nDataPtr = nullptr;
 };
-#pragma pack(pop)

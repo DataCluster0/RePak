@@ -2,7 +2,7 @@
 
 #include <pch.h>
 
-#pragma pack(push, 1)
+#pragma pack(push, 2)
 // size: 0x78 (120 bytes)
 struct ModelHeader
 {
@@ -42,15 +42,6 @@ struct ModelHeader
 	uint64_t Padding7 = 0;
 	uint64_t Padding8 = 0;
 	uint64_t Padding9 = 0;
-};
-
-// small struct to allow verification of the 0tVG section of starpak
-// model data without needing to load the entire thing into memory for a simple
-// validation check
-struct BasicRMDLVGHeader
-{
-	uint32_t magic;
-	uint32_t version;
 };
 
 // modified source engine studio mdl header struct
@@ -245,6 +236,15 @@ struct materialref_t
 {
 	uint32_t pathoffset;
 	uint64_t guid;
+};
+
+// small struct to allow verification of the 0tVG section of starpak
+// model data without needing to load the entire thing into memory for a simple
+// validation check
+struct BasicRMDLVGHeader
+{
+	uint32_t magic;
+	uint32_t version;
 };
 
 struct RMDLVTXHeader

@@ -17,7 +17,7 @@ struct RGBA
 	RGBA() {};
 };
 
-#pragma pack(push, 1)
+#pragma pack(push, 2)
 // header struct for the material asset cpu data
 struct MaterialCPUHeader
 {
