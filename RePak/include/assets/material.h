@@ -28,11 +28,25 @@ struct MaterialCPUHeader
 
 // the following two structs are found in the ""cpu data"", they are very much alike to what you would use in normal source materials.
 // apex probably has these and more stuff.
+struct MaterialTextureTransformMatrix
+{
+
+	// very similar to how it's done in normal source
+	float TextureScaleX = 1.0;
+	float TextureUnk = 0.0; // unsure what this does, appears to skew/rotate and scale the texture at the same time? weird.
+	float TextureRotation = -0.0; // counter clockwise, 0-1, exceeding one causes Weird Stuff to happen.
+	float TextureScaleY = 1.0;
+	float TextureTranslateX = 0.0;
+	float TextureTranslateY = 0.0;
+
+};
+
+// the following two structs are found in the ""cpu data"", they are very much alike to what you would use in normal source materials.
+// apex probably has these and more stuff.
 struct UVTransformMatrix
 {
-	float c_uvScaleX = 1.0;
-	Vector2 c_uvRotation = { 0.000000, -0.000000 };
-	float c_uvScaleY = 1.0;
+	Vector2 c_RotScaleX = { 1.000000, 0.000000 };
+	Vector2 c_RotScaleY = { -0.000000, 1.000000 };
 	Vector2 c_uvTranslate = { 0.000000, 0.000000 };
 };
 
@@ -124,40 +138,6 @@ struct MaterialHeaderV12
 	0x1D has been observed, seems to invert lighting? used on some exceptionally weird materials.*/
 };
 
-struct MaterialCPUDataV12
-{
-	UVTransformMatrix DetailTransform[1]; // detail texture transform matrix
-	UVTransformMatrix TextureTransform[2]; // 1st is presumably texture (unconfirmed), 2nd assumed to be texture.
-
-	// this might be another texture transform matrix.
-	float UnkFloat2[6] = {
-		0.0, 0.0, 0.0, 0.0, 1.0, 0.0
-	};
-
-	RGBA MainTint[1];
-
-	// these are vector4s for rgba I would think.
-	float UnkData1[12] = {
-		0.0, 0.0, 0.0, 0.0,
-		1.0, 0.0, 0.0, 0.0,
-		10000, -0.0, 0.0, 1.778
-	};
-
-	RGBA SelfillumTint[1];
-
-	// these are (more) vector4s for rgba I would think.
-	uint8_t UnkData2[12 * 4] = {
-	0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x3F,
-	0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x80, 0x3F, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0x00, 0x00, 0x80, 0x3F, 0x8F, 0xC2, 0xF5, 0x3C,
-	0x8F, 0xC2, 0xF5, 0x3C, 0x8F, 0xC2, 0xF5, 0x3C
-	};
-	// this is actually floats but i cba to type all this default data in
-	// the last few are stated as 0xFFFFFFFF which converts to NaN in float, converting NaN to float does not give the same results, why?
-};
-
 // some repeated section at the end of the material header (CMaterialGlue) struct
 struct UnknownMaterialSectionV15
 {
@@ -220,6 +200,41 @@ struct MaterialHeaderV15
 	/* 0xF2 */ uint8_t bytef2;
 	/* 0xF3 */ uint8_t bytef3; // used for unksections loading in UpdateMaterialAsset
 	/* 0xF4 */ char pad_00F4[12];
+};
+
+
+struct MaterialCPUDataV12
+{
+	MaterialTextureTransformMatrix DetailTransform[1]; // detail texture transform matrix
+	MaterialTextureTransformMatrix TextureTransform[2]; // 1st is presumably texture (unconfirmed), 2nd assumed to be texture.
+
+	// this might be another texture transform matrix.
+	float UnkFloat2[6] = {
+		0.0, 0.0, 0.0, 0.0, 1.0, 0.0
+	};
+
+	RGBA MainTint[1];
+
+	// these are vector4s for rgba I would think.
+	float UnkData1[12] = {
+		0.0, 0.0, 0.0, 0.0,
+		1.0, 0.0, 0.0, 0.0,
+		10000, -0.0, 0.0, 1.778
+	};
+
+	RGBA SelfillumTint[1];
+
+	// these are (more) vector4s for rgba I would think.
+	uint8_t UnkData2[12 * 4] = {
+	0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0x3F,
+	0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x80, 0x3F, 0xFF, 0xFF, 0xFF, 0xFF,
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x80, 0x3F, 0x8F, 0xC2, 0xF5, 0x3C,
+	0x8F, 0xC2, 0xF5, 0x3C, 0x8F, 0xC2, 0xF5, 0x3C
+	};
+	// this is actually floats but i cba to type all this default data in
+	// the last few are stated as 0xFFFFFFFF which converts to NaN in float, converting NaN to float does not give the same results, why?
 };
 
 struct MaterialCPUDataV15
@@ -301,4 +316,6 @@ struct MaterialCPUDataV15
 	Vector3 c_L1_scatterAmount = { 0.000000, 0.000000, 0.000000 };
 	float c_L1_scatterRatio = 0.000000;
 };
+
 #pragma pack(pop)
+

@@ -616,10 +616,12 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 		}
 	}
 
-	cpudata.DetailTransform->c_uvScaleX = DetailTransformMatrix[0];
-	cpudata.DetailTransform->c_uvRotation = { DetailTransformMatrix[1], DetailTransformMatrix[2] }; ;
-	cpudata.DetailTransform->c_uvScaleY = DetailTransformMatrix[3];
-	cpudata.DetailTransform->c_uvTranslate = { DetailTransformMatrix[4], DetailTransformMatrix[5] };
+	cpudata.DetailTransform->TextureScaleX = DetailTransformMatrix[0];
+	cpudata.DetailTransform->TextureUnk = DetailTransformMatrix[1];
+	cpudata.DetailTransform->TextureRotation = DetailTransformMatrix[2];
+	cpudata.DetailTransform->TextureScaleY = DetailTransformMatrix[3];
+	cpudata.DetailTransform->TextureTranslateX = DetailTransformMatrix[4];
+	cpudata.DetailTransform->TextureTranslateY = DetailTransformMatrix[5];
 
 	memcpy_s(cpuData + sizeof(MaterialCPUHeader), cpuDataSize, &cpudata, cpuDataSize);
 	//////////////////////////////////////////
@@ -875,7 +877,7 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	/// cpu
 
 	// required for accurate colour
-	MaterialCPUDataV15* CpuData = new MaterialCPUDataV15();
+	MaterialCPUDataV15 CpuData;
 
 	std::uint64_t cpuDataSize = sizeof(MaterialCPUDataV15);
 
