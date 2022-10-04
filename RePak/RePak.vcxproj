@@ -163,16 +163,27 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="src\Quaternion.cpp" />
     <ClCompile Include="src\RePak.cpp" />
     <ClCompile Include="src\rmem.cpp" />
     <ClCompile Include="src\rtech.cpp" />
+    <ClCompile Include="src\SEAsset.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Assets.h" />
+    <ClInclude Include="include\assets\animation.h" />
+    <ClInclude Include="include\assets\datatable.h" />
+    <ClInclude Include="include\assets\material.h" />
+    <ClInclude Include="include\assets\model.h" />
+    <ClInclude Include="include\assets\patch.h" />
+    <ClInclude Include="include\assets\rui.h" />
+    <ClInclude Include="include\assets\settings.h" />
+    <ClInclude Include="include\assets\texture.h" />
     <ClInclude Include="include\BinaryIO.h" />
     <ClInclude Include="include\dxutils.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\Quaternion.h" />
     <ClInclude Include="include\rapidcsv\rapidcsv.h" />
     <ClInclude Include="include\rapidjson\allocators.h" />
     <ClInclude Include="include\rapidjson\cursorstreamwrapper.h" />
@@ -216,6 +227,7 @@
     <ClInclude Include="include\rmem.h" />
     <ClInclude Include="include\rpak.h" />
     <ClInclude Include="include\rtech.h" />
+    <ClInclude Include="include\SEAsset.h" />
     <ClInclude Include="include\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

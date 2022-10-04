@@ -56,6 +56,7 @@ public:
 		//ASSET_HANDLER("stlt", file, assets, Assets::AddSettingsLayoutAsset, Assets::AddSettingsLayoutAsset);
 		ASSET_HANDLER("stgs", file, assets, Assets::AddSettingsAsset, Assets::AddSettingsAsset);
 		ASSET_HANDLER("arig", file, assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
+		ASSET_HANDLER("aseq", file, assets, Assets::AddRigAsset_stub, Assets::AddRseqAssets_v7);
 	};
 
 	virtual size_t GetAssetCount() { return assets.size(); };
@@ -72,7 +73,7 @@ public:
 			io->write(it.m_nRawDataBlockOffset);
 			io->write(it.m_nStarpakOffset);
 
-			if(this->version == 8)
+			if (this->version == 8)
 				io->write(it.m_nOptStarpakOffset);
 
 			io->write(it.m_nPageEnd);

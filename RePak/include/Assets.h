@@ -6,6 +6,8 @@
 #define DTBL_VERSION 1
 #define RMDL_VERSION 9
 #define MATL_VERSION 15
+#define ARIG_VERSION 4
+#define STGS_VERSION 1
 
 namespace Assets
 {
@@ -26,6 +28,7 @@ namespace Assets
 
 	void AddRigAsset_stub(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 	void AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
+	void AddRseqAssets_v7(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 
 
 	extern std::string g_sAssetsDir;

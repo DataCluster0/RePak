@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Assets.h"
-#include <dxutils.h>
-#include <string>
+#include "assets/settings.h"
 
 std::vector<std::string> strsplit(std::string str, std::string deli = " ")
 {
@@ -17,7 +16,6 @@ std::vector<std::string> strsplit(std::string str, std::string deli = " ")
 	StringArray.push_back(str.substr(start, end - start));
 	return StringArray;
 }
-
 
 std::unordered_map<std::string, SettingsFieldType> SettingsTypeMap =
 {
@@ -211,7 +209,6 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 	Log("\n==============================\n");
 	Log("Asset stgs -> '%s'\n", sAssetName.c_str());
 
-
 	//ParseLayout(sAssetName);
 	SettingsHeader* hdr = new SettingsHeader();
 
@@ -403,7 +400,7 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::STGS);
-	asset.m_nVersion = 1;
+	asset.m_nVersion = STGS_VERSION;
 	asset.unk1 = 2;
 
 	asset.m_nPageEnd = stringbufinfo.index + 1; // number of the highest page that the asset references pageidx + 1
