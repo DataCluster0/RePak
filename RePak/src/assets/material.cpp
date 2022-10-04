@@ -879,6 +879,36 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	// required for accurate colour
 	MaterialCPUDataV15 CpuData;
 
+	if (mapEntry.HasMember("cputype") && mapEntry["cputype"].IsString())
+	{
+		std::string entry = mapEntry["cputype"].GetStdString();
+
+		if (entry == "weapon")
+		{
+			CpuData.uv1.c_RotScaleX = { -0.000000, 1.000000 };
+			CpuData.uv1.c_RotScaleY = { 0.000000, 1.000000 };
+			CpuData.uv1.c_Translate = { 0.200000, 0.100000 };
+			CpuData.uv2.c_RotScaleX = { -0.000000, 1.000000 };
+			CpuData.uv2.c_RotScaleY = { 0.000000, 1.000000 };
+			CpuData.uv2.c_Translate = { 0.010000, -0.000000 };
+			CpuData.uv3.c_RotScaleX = { 1.000000, -0.000000 };
+			CpuData.uv3.c_RotScaleY = { 0.000000, 1.000000 };
+			CpuData.uv3.c_Translate = { -0.000000, -0.000000 };
+			CpuData.uv4.c_RotScaleX = { 1.000000, -0.000000 };
+			CpuData.uv4.c_RotScaleY = { 0.000000, 1.000000 };
+			CpuData.uv4.c_Translate = { -0.000000, -0.000000 };
+			CpuData.uv5.c_RotScaleX = { 1.000000, -0.000000 };
+			CpuData.uv5.c_RotScaleY = { 0.000000, 1.000000 };
+			CpuData.uv5.c_Translate = { -0.000000, -0.000000 };
+
+			CpuData.c_uvDistortionIntensity = { 0.300000, 0.300000 };
+
+			CpuData.c_emissiveEdgeFadeExponent = 2.000000;
+			CpuData.c_emissiveEdgeFadeOuter = 1.500000;
+
+		}
+	}
+
 	std::uint64_t cpuDataSize = sizeof(MaterialCPUDataV15);
 
 	// cpu data
@@ -913,7 +943,6 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	asset.m_nVersion = MATL_VERSION;
 
 	asset.m_nPageEnd = cpuseginfo.index + 1;
-
 
 	asset.m_nUsesStartIdx = fileRelationIdx;
 	asset.m_nUsesCount = assetUsesCount;

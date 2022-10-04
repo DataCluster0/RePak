@@ -47,7 +47,7 @@ struct UVTransformMatrix
 {
 	Vector2 c_RotScaleX = { 1.000000, 0.000000 };
 	Vector2 c_RotScaleY = { -0.000000, 1.000000 };
-	Vector2 c_uvTranslate = { 0.000000, 0.000000 };
+	Vector2 c_Translate = { 0.000000, 0.000000 };
 };
 
 struct UnknownMaterialSectionV12
