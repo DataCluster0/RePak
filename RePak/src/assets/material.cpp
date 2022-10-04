@@ -813,10 +813,11 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	}
 	else if (type == "rgdp")
 	{
-		mtlHdr->m_GUIDRefs[0] = 0x251fbe09effe8ab1;
-		mtlHdr->m_GUIDRefs[1] = 0xe2d52641afc77395;
-		mtlHdr->m_GUIDRefs[2] = 0xbdbf90b97e7d9280;
-		mtlHdr->m_GUIDRefs[3] = 0x85654e05cf9b40e7;
+		// GUIDRefs[4] is Colpass entry which is optional for wldc.
+		mtlHdr->m_GUIDRefs[0] = 0x251FBE09EFFE8AB1; // DepthShadow
+		mtlHdr->m_GUIDRefs[1] = 0xE2D52641AFC77395; // DepthPrepass
+		mtlHdr->m_GUIDRefs[2] = 0xBDBF90B97E7D9280; // DepthVSM
+		mtlHdr->m_GUIDRefs[3] = 0x85654E05CF9B40E7; // DepthShadowTight
 
 		RePak::RegisterGuidDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_GUIDRefs));
 		RePak::RegisterGuidDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_GUIDRefs) + 8);
