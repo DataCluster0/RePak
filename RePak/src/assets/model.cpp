@@ -169,8 +169,7 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	// static name for now
 	RePak::AddStarpakReference(starpakPath);
 
-	SRPkDataEntry de{ 0, vgFileSize, (uint8_t*)pVGBuf };
-	de = RePak::AddStarpakDataEntry(de);
+	SRPkDataEntry de = RePak::AddStarpakDataEntry( { 0, vgFileSize, (uint8_t*)pVGBuf } );
 
 	pHdr->alignedStreamingSize = de.m_nDataSize;
 
@@ -179,7 +178,9 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(ModelHeader), SF_HEAD, 16);
 
 	// data segment
-	_vseginfo_t dataseginfo = RePak::CreateNewSegment(mdlhdr.length + fileNameDataSize, SF_CPU, 64);
+	size_t DataSize = mdlhdr.length + fileNameDataSize + sizeof(pVGBuf);
+
+	_vseginfo_t dataseginfo = RePak::CreateNewSegment(DataSize, SF_CPU, 64);
 
 	_vseginfo_t physeginfo;
 	if (phyBuf)
@@ -193,12 +194,20 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	if (pAnimSeqBuf)
 		aseqseginfo = RePak::CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
 
-	pHdr->pName = { dataseginfo.index, 0 };
+	uint32_t PageOffset = 0;
+	pHdr->pName = { dataseginfo.index, PageOffset };
 
-	pHdr->pRMDL = { dataseginfo.index, fileNameDataSize };
+	PageOffset += fileNameDataSize;
 
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
+	pHdr->pRMDL = { dataseginfo.index, PageOffset };
+
+	PageOffset += mdlhdr.length;
+
+	pHdr->pStaticPropVtxCache = { dataseginfo.index , PageOffset };
+
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pName));
+	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
+	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pStaticPropVtxCache));
 
 	if (phyBuf)
 	{
@@ -233,8 +242,6 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	}
 
 	rmem dataBuf(pDataBuf);
-	dataBuf.seek(fileNameDataSize + mdlhdr.textureindex, rseekdir::beg);
-
 	// register guid relations on each of the model's material guids
 
 	std::vector<uint64_t> MaterialOverrides;

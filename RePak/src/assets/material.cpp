@@ -848,8 +848,9 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		RePak::AddFileRelation(assetEntries->size());
 		assetUsesCount++;
 
-		bColpass = false;
+		bColpass = true;
 	}
+
 	mtlHdr->m_pTextureHandles.m_nIndex = dataseginfo.index;
 	mtlHdr->m_pTextureHandles.m_nOffset = guidPageOffset;
 
@@ -867,11 +868,31 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		for (int j = 0; j < 8; ++j)
 			mtlHdr->m_UnknownSections[i].m_Unknown1[j] = 0xf0000000;
 
-		uint32_t f1 = bColpass ? 0x5 : 0x17;
+		uint16_t visFlag = bColpass ? MatVisFlags::Colpass : MatVisFlags::Opaque;
+		uint16_t faceFlag = MatRenderFlags::NoCulling;
+
+		if (mapEntry.HasMember("visflags") && mapEntry["visflags"].IsString()) {
+			std::string vis = mapEntry["visflags"].GetString();
+
+			if (vis == "opaque")            visFlag = MatVisFlags::Opaque;
+			else if (vis == "transparent")  visFlag = MatVisFlags::Transparent;
+			else if (vis == "colpass")      visFlag = MatVisFlags::Colpass;
+			else if (vis == "none")         visFlag = MatVisFlags::None;
+		}
+
+		if (mapEntry.HasMember("drawflags") && mapEntry["drawflags"].IsString()) {
+			std::string draw = mapEntry["faceflags"].GetString();
+
+			if (draw == "culling")        faceFlag = MatRenderFlags::Culling;
+			else if (draw == "wireframe") faceFlag = MatRenderFlags::Wireframe;
+			else if (draw == "inverted")  faceFlag = MatRenderFlags::inverted;
+			else if (draw == "unknown")   faceFlag = MatRenderFlags::Unknown;
+			else if (draw == "default")   faceFlag = MatRenderFlags::Default;
+		}
 
 		mtlHdr->m_UnknownSections[i].m_UnkRenderFlags = 4;
-		mtlHdr->m_UnknownSections[i].m_VisibilityFlags = f1;
-		mtlHdr->m_UnknownSections[i].m_FaceDrawingFlags = 6;
+		mtlHdr->m_UnknownSections[i].m_VisibilityFlags = visFlag;
+		mtlHdr->m_UnknownSections[i].m_FaceDrawingFlags = faceFlag;
 	}
 
 	//////////////////////////////////////////
@@ -906,7 +927,6 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 
 			CpuData.c_emissiveEdgeFadeExponent = 2.000000;
 			CpuData.c_emissiveEdgeFadeOuter = 1.500000;
-
 		}
 	}
 
