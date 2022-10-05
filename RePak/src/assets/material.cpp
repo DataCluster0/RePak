@@ -881,7 +881,7 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		}
 
 		if (mapEntry.HasMember("drawflags") && mapEntry["drawflags"].IsString()) {
-			std::string draw = mapEntry["faceflags"].GetStdString();
+			std::string draw = mapEntry["drawflags"].GetStdString();
 
 			if (draw == "culling")        faceFlag = MatRenderFlags::Culling;
 			else if (draw == "wireframe") faceFlag = MatRenderFlags::Wireframe;
