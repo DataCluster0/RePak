@@ -872,7 +872,7 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		uint16_t faceFlag = MatRenderFlags::NoCulling;
 
 		if (mapEntry.HasMember("visflags") && mapEntry["visflags"].IsString()) {
-			std::string vis = mapEntry["visflags"].GetString();
+			std::string vis = mapEntry["visflags"].GetStdString();
 
 			if (vis == "opaque")            visFlag = MatVisFlags::Opaque;
 			else if (vis == "transparent")  visFlag = MatVisFlags::Transparent;
@@ -881,7 +881,7 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		}
 
 		if (mapEntry.HasMember("drawflags") && mapEntry["drawflags"].IsString()) {
-			std::string draw = mapEntry["faceflags"].GetString();
+			std::string draw = mapEntry["faceflags"].GetStdString();
 
 			if (draw == "culling")        faceFlag = MatRenderFlags::Culling;
 			else if (draw == "wireframe") faceFlag = MatRenderFlags::Wireframe;
