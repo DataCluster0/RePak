@@ -71,9 +71,10 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	vgInput.getReader()->read(pVGBuf, vgFileSize);
 	vgInput.close();
 
+	// close mdl reader
 	uint32_t fileNameDataSize = sAssetName.length() + 1;
 
-	size_t DataSize = mdlhdr.length + fileNameDataSize + sizeof(pVGBuf);
+	size_t DataSize = fileNameDataSize + mdlhdr.length + vgFileSize;
 
 	char* pDataBuf = new char[DataSize];
 
@@ -89,11 +90,12 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	rmem dataBuf(pDataBuf);
 
+	// write VG data for static prop cache
+	dataBuf.write(pVGBuf, fileNameDataSize + mdlhdr.length);
+
 	// data segment
 
-	//
 	// Physics
-	//
 	char* phyBuf = nullptr;
 	size_t phyFileSize = 0;
 
@@ -197,18 +199,11 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	if (pAnimSeqBuf)
 		aseqseginfo = RePak::CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
 
-	uint32_t PageOffset = 0;
-	pHdr->pName = { dataseginfo.index, PageOffset };
+	pHdr->pName = { dataseginfo.index, 0 };
 
-	PageOffset += fileNameDataSize;
+	pHdr->pRMDL = { dataseginfo.index, fileNameDataSize };
 
-	pHdr->pRMDL = { dataseginfo.index, PageOffset };
-
-	PageOffset += mdlhdr.length;
-
-	pHdr->pStaticPropVtxCache = { dataseginfo.index , PageOffset };
-
-	dataBuf.write(pVGBuf, PageOffset);
+	pHdr->pStaticPropVtxCache = { dataseginfo.index , fileNameDataSize + mdlhdr.length };
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pName));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
@@ -290,32 +285,27 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 			RePak::RegisterGuidDescriptor(dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
 	}
 
-	RPakRawDataBlock shdb{ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr };
-	RePak::AddRawDataBlock(shdb);
+	RePak::AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
 
-	RPakRawDataBlock rdb{ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf };
-	RePak::AddRawDataBlock(rdb);
+	RePak::AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
 
 	uint32_t lastPageIdx = dataseginfo.index;
 
 	if (phyBuf)
 	{
-		RPakRawDataBlock phydb{ physeginfo.index, physeginfo.size, (uint8_t*)phyBuf };
-		RePak::AddRawDataBlock(phydb);
+		RePak::AddRawDataBlock({ physeginfo.index, physeginfo.size, (uint8_t*)phyBuf });
 		lastPageIdx = physeginfo.index;
 	}
 
 	if (pAnimRigBuf)
 	{
-		RPakRawDataBlock arigdb{ arigseginfo.index, arigseginfo.size, (uint8_t*)pAnimRigBuf };
-		RePak::AddRawDataBlock(arigdb);
+		RePak::AddRawDataBlock({ arigseginfo.index, arigseginfo.size, (uint8_t*)pAnimRigBuf });
 		lastPageIdx = arigseginfo.index;
 	}
 
 	if (pAnimSeqBuf)
 	{
-		RPakRawDataBlock aseqdb{ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf };
-		RePak::AddRawDataBlock(aseqdb);
+		RePak::AddRawDataBlock({ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf });
 		lastPageIdx = aseqseginfo.index;
 	}
 
