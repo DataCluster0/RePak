@@ -49,6 +49,20 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 		return;
 	}
 
+	uint32_t fileNameDataSize = sAssetName.length() + 1;
+
+	char* pDataBuf = new char[fileNameDataSize + mdlhdr.length];
+
+	// write the model file path into the data buffer
+	snprintf(pDataBuf, fileNameDataSize, "%s", sAssetName.c_str());
+
+	// go back to the beginning of the file to read all the data
+	skelInput.seek(0);
+
+	// write the skeleton data into the data buffer
+	skelInput.getReader()->read(pDataBuf + fileNameDataSize, mdlhdr.length);
+	skelInput.close();
+
 	///--------------------
 	// Add VG data
 	BinaryIO vgInput;
@@ -70,26 +84,6 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	vgInput.seek(0);
 	vgInput.getReader()->read(pVGBuf, vgFileSize);
 	vgInput.close();
-
-	uint32_t fileNameDataSize = sAssetName.length() + 1;
-
-	size_t DataSize = mdlhdr.length + fileNameDataSize + sizeof(pVGBuf);
-
-	char* pDataBuf = new char[DataSize];
-
-	// write the model file path into the data buffer
-	snprintf(pDataBuf, fileNameDataSize, "%s", sAssetName.c_str());
-
-	// go back to the beginning of the file to read all the data
-	skelInput.seek(0);
-
-	// write the skeleton data into the data buffer
-	skelInput.getReader()->read(pDataBuf + fileNameDataSize, mdlhdr.length);
-	skelInput.close();
-
-	rmem dataBuf(pDataBuf);
-
-	// data segment
 
 	//
 	// Physics
@@ -175,13 +169,16 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	// static name for now
 	RePak::AddStarpakReference(starpakPath);
 
-	SRPkDataEntry de = RePak::AddStarpakDataEntry({ 0, vgFileSize, (uint8_t*)pVGBuf });
+	SRPkDataEntry de = RePak::AddStarpakDataEntry( { 0, vgFileSize, (uint8_t*)pVGBuf } );
 
 	pHdr->alignedStreamingSize = de.m_nDataSize;
 
 	// Segments
 	// asset header
 	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(ModelHeader), SF_HEAD, 16);
+
+	// data segment
+	size_t DataSize = mdlhdr.length + fileNameDataSize + sizeof(pVGBuf);
 
 	_vseginfo_t dataseginfo = RePak::CreateNewSegment(DataSize, SF_CPU, 64);
 
@@ -207,8 +204,6 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	PageOffset += mdlhdr.length;
 
 	pHdr->pStaticPropVtxCache = { dataseginfo.index , PageOffset };
-
-	dataBuf.write(pVGBuf, PageOffset);
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pName));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
@@ -246,6 +241,7 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 		}
 	}
 
+	rmem dataBuf(pDataBuf);
 	// register guid relations on each of the model's material guids
 
 	std::vector<uint64_t> MaterialOverrides;
