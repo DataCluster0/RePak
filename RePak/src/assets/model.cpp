@@ -194,16 +194,9 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	if (pAnimSeqBuf)
 		aseqseginfo = RePak::CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
 
-	uint32_t PageOffset = 0;
-	pHdr->pName = { dataseginfo.index, PageOffset };
+	pHdr->pName = { dataseginfo.index, 0 };
 
-	PageOffset += fileNameDataSize;
-
-	pHdr->pRMDL = { dataseginfo.index, PageOffset };
-
-	PageOffset += mdlhdr.length;
-
-	pHdr->pStaticPropVtxCache = { dataseginfo.index , PageOffset };
+	pHdr->pRMDL = { dataseginfo.index, fileNameDataSize };
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pName));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
