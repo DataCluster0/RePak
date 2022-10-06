@@ -11,6 +11,8 @@
 
 struct RPakFileBase;
 
+struct RPakFileBase;
+
 namespace Assets
 {
 	//void AddTextureAsset(std::vector<RPakAssetEntryV7>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
@@ -32,9 +34,6 @@ namespace Assets
 	void AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 	void AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry);
 
-
 	extern std::string g_sAssetsDir;
-	extern std::vector<std::string> g_vsStarpakPaths;
-	extern std::vector<std::string> g_vsOptStarpakPaths;
 };
 
