@@ -161,10 +161,16 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	//
 	// Starpak
 	//
-	std::string starpakPath = "paks/Win64/repak.starpak";
+	std::string starpakPath = pak->primaryStarpakPath;
 
 	if (mapEntry.HasMember("starpakPath") && mapEntry["starpakPath"].IsString())
+	{
 		starpakPath = mapEntry["starpakPath"].GetStdString();
+		pak->AddStarpakReference(starpakPath);
+	}
+
+	if (starpakPath.length() == 0)
+		Error("attempted to add asset '%s' as a streaming asset, but no starpak files were available.\nto fix: add 'starpakPath' as an rpak-wide variable\nor: add 'starpakPath' as an asset specific variable\n", assetPath);
 
 	// static name for now
 	pak->AddStarpakReference(starpakPath);
@@ -200,7 +206,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 
 	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pName));
 	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
-	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pStaticPropVtxCache));
+	//pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pStaticPropVtxCache));
 
 	if (phyBuf)
 	{
@@ -257,10 +263,11 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 			else if (it.IsUint64() && it.GetUint64() != 0x0)
 			{
 				MaterialOverrides.push_back(it.GetUint64());
-			}
+			} 
 		}
 	}
 
+	size_t relations = 0;
 	Log("Materials -> %d\n", mdlhdr.numtextures);
 
 	for (int i = 0; i < mdlhdr.numtextures; ++i)
@@ -276,6 +283,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 		}
 
 		Log("Material Guid -> 0x%llX\n", material->guid);
+
 
 		if (material->guid != 0)
 			pak->AddGuidDescriptor(&guids, dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
@@ -312,9 +320,9 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	asset.pageEnd = lastPageIdx + 1;
 
 	// this needs to be fixed!!!
-	//size_t fileRelationIdx = pak->AddFileRelation(assetEntries->size());
-	//asset.usesStartIdx = fileRelationIdx;
-	//asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount;
+	//asset.AddRelation(assetEntries->size());
+
+	//asset.relationCount = relations;
 
 	asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
 	asset.unk1 = asset.usesCount + 1;
