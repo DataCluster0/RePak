@@ -813,7 +813,7 @@ void Assets::AddMaterialAsset_v15(RPakFileBase* pak, std::vector<RPakAssetEntry>
 	if (mapEntry.HasMember("shaderset") && mapEntry["shaderset"].IsUint64() && mapEntry["shaderset"].GetUint64() != 0x0)
 		mtlHdr->m_pShaderSet = mapEntry["shaderset"].GetUint64();
 
-	pak->AddPointer(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pShaderSet));
+	pak->AddGuidDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pShaderSet));
 	pak->AddFileRelation(assetEntries->size());
 	assetUsesCount++;
 
