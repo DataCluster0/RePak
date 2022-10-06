@@ -4,12 +4,12 @@
 #include "assets/animation.h"
 #include "SeAsset.h"
 
-void Assets::AddRigAsset_stub(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddRigAsset_stub(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	Error("RPak version 7 (Titanfall 2) ARIG NOT IMPLEMENTED!!!!");
 }
 
-void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	Log("\n==============================\n");
 	Log("Asset arig -> '%s'\n", assetPath);
@@ -63,10 +63,10 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 
 	// Segments
 	// asset header
-	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(AnimRigHeader), SF_HEAD, 16);
+	_vseginfo_t subhdrinfo = pak->CreateNewSegment(sizeof(AnimRigHeader), SF_HEAD, 16);
 
 	// data segment
-	_vseginfo_t dataseginfo = RePak::CreateNewSegment(DataBufferSize, SF_CPU, 64);
+	_vseginfo_t dataseginfo = pak->CreateNewSegment(DataBufferSize, SF_CPU, 64);
 
 	// write the rrig file path into the data buffer
 	snprintf(pDataBuf, NameDataSize, "%s", sAssetName.c_str());
@@ -83,9 +83,9 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 	SegmentOffset += mdlhdr.length;
 	pHdr->pAseqRefs = { dataseginfo.index, SegmentOffset };
 
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(AnimRigHeader, pName));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(AnimRigHeader, pSkeleton));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(AnimRigHeader, pAseqRefs));
+	pak->AddPointer(subhdrinfo.index, offsetof(AnimRigHeader, pName));
+	pak->AddPointer(subhdrinfo.index, offsetof(AnimRigHeader, pSkeleton));
+	pak->AddPointer(subhdrinfo.index, offsetof(AnimRigHeader, pAseqRefs));
 
 	for (int i = 0; i < pHdr->AseqRefCount; i++)
 	{
@@ -98,11 +98,11 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 
 		DataWriter.write<uint64_t>(RTech::StringToGuid(Entry.GetStdString().c_str()), Offset);
 
-		RePak::RegisterGuidDescriptor(dataseginfo.index, Offset);
+		pak->AddGuidDescriptor(dataseginfo.index, Offset);
 	}
 
-	RePak::AddRawDataBlock( { subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr } );
-	RePak::AddRawDataBlock( { dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf } );
+	pak->AddRawDataBlock( { subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr } );
+	pak->AddRawDataBlock( { dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf } );
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::ARIG);
@@ -111,7 +111,7 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 
 	asset.pageEnd = dataseginfo.index + 1;
 
-	asset.m_nUsesStartIdx = RePak::AddFileRelation(assetEntries->size());
+	asset.usesStartIdx = pak->AddFileRelation(assetEntries->size());
 	asset.relationCount = 1;
 
 	asset.usesCount = pHdr->AseqRefCount;
@@ -120,7 +120,7 @@ void Assets::AddRigAsset_v4(std::vector<RPakAssetEntry>* assetEntries, const cha
 	assetEntries->push_back(asset);
 }
 
-void Assets::AddRseqAssets_v7(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	std::string sAssetName = assetPath;
 	sAssetName = sAssetName + ".rseq";
@@ -161,8 +161,8 @@ void Assets::AddRseqAssets_v7(std::vector<RPakAssetEntry>* assetEntries, const c
 	//
 	//REQUIRE_FILE(skelFilePath);
 
-	//RePak::AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
-	//RePak::AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
+	//pak->AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
+	//pak->AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
 	//
 	//RPakAssetEntry asset;
 	//asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::ASEQ);
@@ -171,7 +171,7 @@ void Assets::AddRseqAssets_v7(std::vector<RPakAssetEntry>* assetEntries, const c
 	//
 	//asset.m_nPageEnd = dataseginfo.index + 1;
 	//
-	//asset.m_nUsesStartIdx = RePak::AddFileRelation(assetEntries->size());
+	//asset.usesStartIdx = pak->AddFileRelation(assetEntries->size());
 	//asset.relationCount = 1;
 	//
 	//

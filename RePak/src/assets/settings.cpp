@@ -96,7 +96,7 @@ void SetupBuffersFromFieldType(rapidjson::Value& Value, size_t& ValueBuffer, siz
 	}
 }
 
-void Assets::AddSettingsLayoutAsset(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddSettingsLayoutAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	std::string sAssetName = assetPath;
 	sAssetName = "settings_layout/settings_" + sAssetName + "_layout.rpak";
@@ -153,37 +153,37 @@ void Assets::AddSettingsLayoutAsset(std::vector<RPakAssetEntry>* assetEntries, c
 	uint64_t itemDataSize = items.size() * sizeof(SettingsLayoutItem);
 
 	// asset header
-	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(SettingsLayoutHeader), SF_HEAD /*| SF_CLIENT*/, 8);
+	_vseginfo_t subhdrinfo = pak->CreateNewSegment(sizeof(SettingsLayoutHeader), SF_HEAD /*| SF_CLIENT*/, 8);
 
 	// name data
-	_vseginfo_t nameinfo = RePak::CreateNewSegment(assetPathSize, SF_CPU, assetPathSize % 4);
+	_vseginfo_t nameinfo = pak->CreateNewSegment(assetPathSize, SF_CPU, assetPathSize % 4);
 	uint32_t dataBufSize = (sAssetName.length() + (sAssetName.length() % 4));
 	char* nameData = new char[dataBufSize];
 	{
 		snprintf(nameData, assetPathSize, "%s", sAssetName.c_str());
 		hdr->pName = { nameinfo.index, 0 };
 
-		RePak::RegisterDescriptor(nameinfo.index, offsetof(SettingsLayoutHeader, pName));
+		pak->AddPointer(nameinfo.index, offsetof(SettingsLayoutHeader, pName));
 	}
 
 	// item data
-	_vseginfo_t iteminfo = RePak::CreateNewSegment(itemDataSize, SF_CPU, 8);
+	_vseginfo_t iteminfo = pak->CreateNewSegment(itemDataSize, SF_CPU, 8);
 	char* itemData = new char[itemDataSize];
 	{
 		memcpy(itemData, items.data(), itemDataSize);
 		hdr->pItems = { iteminfo.index, 0 };
-		RePak::RegisterDescriptor(iteminfo.index, offsetof(SettingsLayoutHeader, pItems));
+		pak->AddPointer(iteminfo.index, offsetof(SettingsLayoutHeader, pItems));
 	}
 
 	// string buffer data
-	_vseginfo_t stringbufferinfo = RePak::CreateNewSegment(StringBufferSize, SF_CPU, 8);
+	_vseginfo_t stringbufferinfo = pak->CreateNewSegment(StringBufferSize, SF_CPU, 8);
 	hdr->pStringBuf = { stringbufferinfo.index , 0 };
-	RePak::RegisterDescriptor(stringbufferinfo.index, offsetof(SettingsLayoutHeader, pStringBuf));
+	pak->AddPointer(stringbufferinfo.index, offsetof(SettingsLayoutHeader, pStringBuf));
 
-	RePak::AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)hdr });
-	RePak::AddRawDataBlock({ nameinfo.index, nameinfo.size, (uint8_t*)nameData });
-	RePak::AddRawDataBlock({ iteminfo.index, iteminfo.size, (uint8_t*)itemData });
-	RePak::AddRawDataBlock({ stringbufferinfo.index, stringbufferinfo.size, (uint8_t*)StringBufferData });
+	pak->AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)hdr });
+	pak->AddRawDataBlock({ nameinfo.index, nameinfo.size, (uint8_t*)nameData });
+	pak->AddRawDataBlock({ iteminfo.index, iteminfo.size, (uint8_t*)itemData });
+	pak->AddRawDataBlock({ stringbufferinfo.index, stringbufferinfo.size, (uint8_t*)StringBufferData });
 
 	//create and init the asset entry
 	RPakAssetEntry asset;
@@ -193,14 +193,14 @@ void Assets::AddSettingsLayoutAsset(std::vector<RPakAssetEntry>* assetEntries, c
 	asset.pageEnd = stringbufferinfo.index + 1; // number of the highest page that the asset references pageidx + 1
 	asset.unk1 = 2;
 
-	asset.m_nUsesStartIdx = 0;
+	asset.usesStartIdx = 0;
 	asset.usesCount = 0; // the asset should only use 1 other asset for the atlas
 
 	// add the asset entry
 	assetEntries->push_back(asset);
 }
 
-void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	std::string sAssetName = assetPath;
 	sAssetName = "settings/" + sAssetName + ".rpak";
@@ -213,9 +213,9 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 	SettingsHeader* hdr = new SettingsHeader();
 
 	//header
-	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(SettingsHeader), SF_HEAD /*| SF_CLIENT*/, 8);
+	_vseginfo_t subhdrinfo = pak->CreateNewSegment(sizeof(SettingsHeader), SF_HEAD /*| SF_CLIENT*/, 8);
 
-	RePak::RegisterDescriptor(subhdrinfo.index, 0);
+	pak->AddPointer(subhdrinfo.index, 0);
 
 	if (mapEntry.HasMember("kvp")) // KVP Buffer Size
 	{
@@ -236,10 +236,10 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 	}
 	else Error("Required field 'layout' not found for settings item. Exiting...\n");
 
-	RePak::RegisterGuidDescriptor(subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
+	pak->AddGuidDescriptor(subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
 
 	uint32_t nameBufSize = sAssetName.length() + 1;
-	_vseginfo_t nameinfo = RePak::CreateNewSegment(nameBufSize, SF_CPU, assetPathSize % 4);
+	_vseginfo_t nameinfo = pak->CreateNewSegment(nameBufSize, SF_CPU, assetPathSize % 4);
 	char* nameData = new char[nameBufSize];
 	{
 		snprintf(nameData, sAssetName.length() + 1, "%s", sAssetName.c_str());
@@ -256,19 +256,19 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 	ValueBufferSize += sizeof(uint64_t);
 
 	// item data
-	_vseginfo_t valueinfo = RePak::CreateNewSegment(ValueBufferSize, SF_CPU, 8);
+	_vseginfo_t valueinfo = pak->CreateNewSegment(ValueBufferSize, SF_CPU, 8);
 	hdr->Values = { valueinfo.index , 0 };
 
 	// string buffer data
-	_vseginfo_t stringbufinfo = RePak::CreateNewSegment(StringBufferSize, SF_CPU, 8);
+	_vseginfo_t stringbufinfo = pak->CreateNewSegment(StringBufferSize, SF_CPU, 8);
 	hdr->StringBuf = { stringbufinfo.index , 0 };
 
 	char* ValueBufferData = new char[ValueBufferSize];
 	char* StringBufferData = new char[StringBufferSize];
 
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Name));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, Values));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(SettingsHeader, StringBuf));
+	pak->AddPointer(subhdrinfo.index, offsetof(SettingsHeader, Name));
+	pak->AddPointer(subhdrinfo.index, offsetof(SettingsHeader, Values));
+	pak->AddPointer(subhdrinfo.index, offsetof(SettingsHeader, StringBuf));
 
 	size_t StringBufferOffset = 0;
 	size_t ValueBufferOffset = 0;
@@ -386,17 +386,17 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 				Error("Unknown Item Type Found in Settings asset Exiting...\n");
 			}
 
-			RePak::RegisterDescriptor(valueinfo.index, ValueBufferOffset);
+			pak->AddPointer(valueinfo.index, ValueBufferOffset);
 		}
 	}
 
 	Debug("Unk1: %d / 0x%llX\n", hdr->Unk1, hdr->Unk1);
 	Debug("kvp: %d / 0x%llX\n", hdr->KvpBufferSize, hdr->KvpBufferSize);
 
-	RePak::AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)hdr });
-	RePak::AddRawDataBlock({ nameinfo.index, nameinfo.size, (uint8_t*)nameData });
-	RePak::AddRawDataBlock({ valueinfo.index, valueinfo.size, (uint8_t*)ValueBufferData });
-	RePak::AddRawDataBlock({ stringbufinfo.index, stringbufinfo.size, (uint8_t*)StringBufferData });
+	pak->AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)hdr });
+	pak->AddRawDataBlock({ nameinfo.index, nameinfo.size, (uint8_t*)nameData });
+	pak->AddRawDataBlock({ valueinfo.index, valueinfo.size, (uint8_t*)ValueBufferData });
+	pak->AddRawDataBlock({ stringbufinfo.index, stringbufinfo.size, (uint8_t*)StringBufferData });
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::STGS);

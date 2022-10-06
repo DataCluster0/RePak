@@ -3,13 +3,13 @@
 #include "assets/model.h"
 #include "assets/animation.h"
 
-void Assets::AddModelAsset_stub(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddModelAsset_stub(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	Log("\n==============================\n");
 	Error("RPak version 7 (Titanfall 2) cannot contain models");
 }
 
-void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
+void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	Log("\n==============================\n");
 	Log("Asset mdl_ -> '%s'\n", assetPath);
@@ -167,45 +167,45 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 		starpakPath = mapEntry["starpakPath"].GetStdString();
 
 	// static name for now
-	RePak::AddStarpakReference(starpakPath);
+	pak->AddStarpakReference(starpakPath);
 
-	SRPkDataEntry de = RePak::AddStarpakDataEntry( { 0, vgFileSize, (uint8_t*)pVGBuf } );
+	SRPkDataEntry de = pak->AddStarpakDataEntry( { 0, vgFileSize, (uint8_t*)pVGBuf } );
 
 	pHdr->alignedStreamingSize = de.m_nDataSize;
 
 	// Segments
 	// asset header
-	_vseginfo_t subhdrinfo = RePak::CreateNewSegment(sizeof(ModelHeader), SF_HEAD, 16);
+	_vseginfo_t subhdrinfo = pak->CreateNewSegment(sizeof(ModelHeader), SF_HEAD, 16);
 
 	// data segment
 	size_t DataSize = mdlhdr.length + fileNameDataSize + sizeof(pVGBuf);
 
-	_vseginfo_t dataseginfo = RePak::CreateNewSegment(DataSize, SF_CPU, 64);
+	_vseginfo_t dataseginfo = pak->CreateNewSegment(DataSize, SF_CPU, 64);
 
 	_vseginfo_t physeginfo;
 	if (phyBuf)
-		physeginfo = RePak::CreateNewSegment(phyFileSize, SF_CPU, 64);
+		physeginfo = pak->CreateNewSegment(phyFileSize, SF_CPU, 64);
 
 	_vseginfo_t arigseginfo;
 	if (pAnimRigBuf)
-		arigseginfo = RePak::CreateNewSegment(pHdr->animRigCount * 8, SF_CPU, 64);
+		arigseginfo = pak->CreateNewSegment(pHdr->animRigCount * 8, SF_CPU, 64);
 
 	_vseginfo_t aseqseginfo;
 	if (pAnimSeqBuf)
-		aseqseginfo = RePak::CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
+		aseqseginfo = pak->CreateNewSegment(pHdr->animSeqCount * 8, SF_CPU, 64);
 
 	pHdr->pName = { dataseginfo.index, 0 };
 
 	pHdr->pRMDL = { dataseginfo.index, fileNameDataSize };
 
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pName));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
-	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pStaticPropVtxCache));
+	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pName));
+	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pRMDL));
+	pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pStaticPropVtxCache));
 
 	if (phyBuf)
 	{
 		pHdr->pPhyData = { physeginfo.index, 0 };
-		RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pPhyData));
+		pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pPhyData));
 	}
 
 	// anim rigs are "includemodels" from source, containing a very stripped version of the main .rmdl data without any meshes
@@ -214,11 +214,11 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	if (pAnimRigBuf)
 	{
 		pHdr->pAnimRigs = { arigseginfo.index, 0 };
-		RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pAnimRigs));
+		pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pAnimRigs));
 
 		for (int i = 0; i < pHdr->animRigCount; ++i)
 		{
-			RePak::RegisterGuidDescriptor(arigseginfo.index, sizeof(uint64_t) * i);
+			pak->AddGuidDescriptor(arigseginfo.index, sizeof(uint64_t) * i);
 		}
 	}
 
@@ -226,11 +226,11 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	{
 		pHdr->pAnimSeqs = { aseqseginfo.index, 0 };
 
-		RePak::RegisterDescriptor(subhdrinfo.index, offsetof(ModelHeader, pAnimSeqs));
+		pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pAnimSeqs));
 
 		for (int i = 0; i < pHdr->animSeqCount; ++i)
 		{
-			RePak::RegisterGuidDescriptor(aseqseginfo.index, sizeof(uint64_t) * i);
+			pak->AddGuidDescriptor(aseqseginfo.index, sizeof(uint64_t) * i);
 		}
 	}
 
@@ -276,35 +276,35 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 		Log("Material Guid -> 0x%llX\n", material->guid);
 
 		if (material->guid != 0)
-			RePak::RegisterGuidDescriptor(dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
+			pak->AddGuidDescriptor(dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
 	}
 
 	RPakRawDataBlock shdb{ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr };
-	RePak::AddRawDataBlock(shdb);
+	pak->AddRawDataBlock(shdb);
 
 	RPakRawDataBlock rdb{ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf };
-	RePak::AddRawDataBlock(rdb);
+	pak->AddRawDataBlock(rdb);
 
 	uint32_t lastPageIdx = dataseginfo.index;
 
 	if (phyBuf)
 	{
 		RPakRawDataBlock phydb{ physeginfo.index, physeginfo.size, (uint8_t*)phyBuf };
-		RePak::AddRawDataBlock(phydb);
+		pak->AddRawDataBlock(phydb);
 		lastPageIdx = physeginfo.index;
 	}
 
 	if (pAnimRigBuf)
 	{
 		RPakRawDataBlock arigdb{ arigseginfo.index, arigseginfo.size, (uint8_t*)pAnimRigBuf };
-		RePak::AddRawDataBlock(arigdb);
+		pak->AddRawDataBlock(arigdb);
 		lastPageIdx = arigseginfo.index;
 	}
 
 	if (pAnimSeqBuf)
 	{
 		RPakRawDataBlock aseqdb{ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf };
-		RePak::AddRawDataBlock(aseqdb);
+		pak->AddRawDataBlock(aseqdb);
 		lastPageIdx = aseqseginfo.index;
 	}
 
@@ -314,8 +314,8 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 	// i have literally no idea what these are
 	asset.pageEnd = lastPageIdx + 1;
 
-	size_t fileRelationIdx = RePak::AddFileRelation(assetEntries->size());
-	asset.m_nUsesStartIdx = fileRelationIdx;
+	size_t fileRelationIdx = pak->AddFileRelation(assetEntries->size());
+	asset.usesStartIdx = fileRelationIdx;
 
 	asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
 	asset.unk1 = asset.usesCount + 1;

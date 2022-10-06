@@ -34,9 +34,6 @@
     <Filter Include="Source Files\assets">
       <UniqueIdentifier>{e323149f-3c50-45c7-94ad-532908ecc5e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\components">
-      <UniqueIdentifier>{148b41e6-3017-4a50-9022-f6d1559e5a4e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\math">
       <UniqueIdentifier>{9c1e81a5-54ae-473e-8453-8d0cfc73ddeb}</UniqueIdentifier>
     </Filter>
@@ -83,9 +80,6 @@
     </ClCompile>
     <ClCompile Include="src\assets\patch.cpp">
       <Filter>Source Files\assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\components\starpak.cpp">
-      <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\settings.cpp">
       <Filter>Source Files\assets</Filter>

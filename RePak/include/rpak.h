@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include <pch.h>
 
-#pragma pack(push, 1)
+
 
 #define SF_HEAD   0 // :skull:
 #define SF_CPU    (1 << 0)
@@ -11,6 +11,8 @@
 #define SF_SERVER (1 << 5)
 #define SF_CLIENT (1 << 6)
 #define SF_DEV    (1 << 7)
+
+#pragma pack(push, 1)
 
 enum class AssetType : uint32_t
 {
@@ -33,6 +35,13 @@ enum class AssetType : uint32_t
 	UI = 'iu' // ui - 0x75690000
 };
 
+// represents a "pointer" into a mempage by page index and offset
+// when loaded, these usually get converted to a real pointer
+struct RPakPtr
+{
+	uint32_t m_nIndex = 0;
+	uint32_t m_nOffset = 0;
+};
 // generic header struct for both apex and titanfall 2
 // contains all the necessary members for both, RPakFileBase::WriteHeader decides
 // which should be written depending on the version
@@ -74,14 +83,6 @@ struct RPakPatchCompressedHeader // Comes after file header if its an patch rpak
 	uint64_t decompressedSize;
 };
 
-// represents a "pointer" into a mempage by page index and offset
-// when loaded, these usually get converted to a real pointer
-struct RPakPtr
-{
-	uint32_t index = 0;
-	uint32_t offset = 0;
-};
-
 // segment
 // these probably aren't actually called virtual segments
 // this struct doesn't really describe any real data segment, but collects info
@@ -109,8 +110,8 @@ struct RPakPageInfo
 // allows the engine to read the index/offset pair and replace it with an actual memory pointer at runtime
 struct RPakDescriptor
 {
-	uint32_t m_nPageIdx;	 // page index
-	uint32_t m_nPageOffset; // offset within page
+	uint32_t index;	 // page index
+	uint32_t offset; // offset within page
 };
 
 // same kinda thing as RPakDescriptor, but this one tells the engine where
@@ -180,11 +181,11 @@ struct RPakAssetEntry
 	uint64_t optStarpakOffset = -1;
 
 	uint16_t pageEnd = 0; // highest mem page used by this asset
-	uint16_t unk1 = 1; // usually m_nUsesCount + 1
+	uint16_t unk1 = 0;
 
-	uint32_t m_nRelationsStartIdx = 0;
+	uint32_t relStartIdx = 0;
 
-	uint32_t m_nUsesStartIdx = 0;
+	uint32_t usesStartIdx = 0;
 	uint32_t relationCount = 0;
 	uint32_t usesCount = 0; // number of other assets that this asset uses
 

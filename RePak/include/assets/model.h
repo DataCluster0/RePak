@@ -51,6 +51,7 @@ struct studiohdr_t
 	int version; // Format version number, such as 48 (0x30,0x00,0x00,0x00)
 	int checksum; // This has to be the same in the phy and vtx files to load!
 	int sznameindex; // This has been moved from studiohdr2 to the front of the main header.
+
 	char name[64]; // The internal name of the model, padding with null bytes.
 	// Typically "my_model.mdl" will have an internal name of "my_model"
 	int length; // Data size of MDL file in bytes.

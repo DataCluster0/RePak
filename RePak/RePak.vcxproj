@@ -156,7 +156,6 @@
     <ClCompile Include="src\assets\rui.cpp" />
     <ClCompile Include="src\assets\settings.cpp" />
     <ClCompile Include="src\assets\texture.cpp" />
-    <ClCompile Include="src\components\starpak.cpp" />
     <ClCompile Include="src\math\Half.cpp" />
     <ClCompile Include="src\math\Matrix.cpp" />
     <ClCompile Include="src\math\Quaternion.cpp" />
