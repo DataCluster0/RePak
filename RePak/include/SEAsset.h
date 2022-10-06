@@ -170,6 +170,8 @@ public:
 
 	struct SEAnim_File_Ext
 	{
+		SEAnim_Header_t hdr;
+
 		std::vector<SEAnim_Bone> Bones{};
 
 		std::vector<SEAnim_Note> Notes{};

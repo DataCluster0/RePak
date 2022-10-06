@@ -188,13 +188,13 @@ void Assets::AddSettingsLayoutAsset(std::vector<RPakAssetEntry>* assetEntries, c
 	//create and init the asset entry
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, iteminfo.index, 0, -1, -1, (std::uint32_t)AssetType::STLT);
-	asset.m_nVersion = 0;
+	asset.version = 0;
 
-	asset.m_nPageEnd = stringbufferinfo.index + 1; // number of the highest page that the asset references pageidx + 1
+	asset.pageEnd = stringbufferinfo.index + 1; // number of the highest page that the asset references pageidx + 1
 	asset.unk1 = 2;
 
 	asset.m_nUsesStartIdx = 0;
-	asset.m_nUsesCount = 0; // the asset should only use 1 other asset for the atlas
+	asset.usesCount = 0; // the asset should only use 1 other asset for the atlas
 
 	// add the asset entry
 	assetEntries->push_back(asset);
@@ -400,10 +400,10 @@ void Assets::AddSettingsAsset(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::STGS);
-	asset.m_nVersion = STGS_VERSION;
+	asset.version = STGS_VERSION;
 	asset.unk1 = 2;
 
-	asset.m_nPageEnd = stringbufinfo.index + 1; // number of the highest page that the asset references pageidx + 1
+	asset.pageEnd = stringbufinfo.index + 1; // number of the highest page that the asset references pageidx + 1
 
 	// add the asset entry
 	assetEntries->push_back(asset);

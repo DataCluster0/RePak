@@ -30,7 +30,6 @@ struct MaterialCPUHeader
 // apex probably has these and more stuff.
 struct MaterialTextureTransformMatrix
 {
-
 	// very similar to how it's done in normal source
 	float TextureScaleX = 1.0;
 	float TextureUnk = 0.0; // unsure what this does, appears to skew/rotate and scale the texture at the same time? weird.
@@ -38,7 +37,6 @@ struct MaterialTextureTransformMatrix
 	float TextureScaleY = 1.0;
 	float TextureTranslateX = 0.0;
 	float TextureTranslateY = 0.0;
-
 };
 
 // the following two structs are found in the ""cpu data"", they are very much alike to what you would use in normal source materials.
@@ -198,8 +196,8 @@ struct MaterialHeaderV15
 	/* 0x68 */ RPakPtr m_pStreamingTextureHandles{}; // Streamable TextureGUID Map
 
 	/* 0x70 */ int16_t m_nStreamingTextureHandleCount = 0x4; // Number of textures with streamed mip levels.
-	/* 0x72 */ int16_t m_nWidth = 2048;
-	/* 0x74 */ int16_t m_nHeight = 2048;
+	/* 0x72 */ int16_t width = 2048;
+	/* 0x74 */ int16_t height = 2048;
 	/* 0x76 */ int16_t m_Unknown1 = 0;
 
 	/* 0x78 */ uint32_t m_SomeFlags = 0x1D0300;
@@ -220,7 +218,6 @@ struct MaterialHeaderV15
 	/* 0xF3 */ uint8_t bytef3; // used for unksections loading in UpdateMaterialAsset
 	/* 0xF4 */ char pad_00F4[12];
 };
-
 
 struct MaterialCPUDataV12
 {
@@ -337,4 +334,3 @@ struct MaterialCPUDataV15
 };
 
 #pragma pack(pop)
-

@@ -172,7 +172,7 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 			if (txtrAsset)
 			{
 				txtrAsset->m_nRelationsStartIdx = fileRelationIdx;
-				txtrAsset->m_nRelationsCounts++;
+				txtrAsset->relationCount++;
 			}
 			else
 				Warning("unable to find texture '%s' for material '%s'\n", it.GetString(), assetPath);
@@ -203,7 +203,7 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 				RPakAssetEntry* txtrAsset = RePak::GetAssetByGuid(assetEntries, guid, nullptr);
 
 				txtrAsset->m_nRelationsStartIdx = fileRelationIdx;
-				txtrAsset->m_nRelationsCounts++;
+				txtrAsset->relationCount++;
 
 				assetUsesCount++; // Next texture index coming up.
 			}
@@ -231,18 +231,18 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 
 	// ===============================
 	// fill out the rest of the header
-	mtlHdr->m_pszName.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pszName.m_nOffset = 0;
+	mtlHdr->m_pszName.index = dataseginfo.index;
+	mtlHdr->m_pszName.offset = 0;
 
-	mtlHdr->m_pszSurfaceProp.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pszSurfaceProp.m_nOffset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2);
+	mtlHdr->m_pszSurfaceProp.index = dataseginfo.index;
+	mtlHdr->m_pszSurfaceProp.offset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2);
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV12, m_pszName));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV12, m_pszSurfaceProp));
 
 	if (mapEntry.HasMember("surface2")) {
-		mtlHdr->m_pszSurfaceProp2.m_nIndex = dataseginfo.index;
-		mtlHdr->m_pszSurfaceProp2.m_nOffset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2) + (surface.length() + 1);
+		mtlHdr->m_pszSurfaceProp2.index = dataseginfo.index;
+		mtlHdr->m_pszSurfaceProp2.offset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2) + (surface.length() + 1);
 
 		RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV12, m_pszSurfaceProp2));
 	}
@@ -534,11 +534,11 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 		bColpass = false;
 	}
 
-	mtlHdr->TextureGUIDs.m_nIndex = dataseginfo.index;
-	mtlHdr->TextureGUIDs.m_nOffset = guidPageOffset;
+	mtlHdr->TextureGUIDs.index = dataseginfo.index;
+	mtlHdr->TextureGUIDs.offset = guidPageOffset;
 
-	mtlHdr->TextureGUIDs2.m_nIndex = dataseginfo.index;
-	mtlHdr->TextureGUIDs2.m_nOffset = guidPageOffset + textureRefSize;
+	mtlHdr->TextureGUIDs2.index = dataseginfo.index;
+	mtlHdr->TextureGUIDs2.offset = guidPageOffset + textureRefSize;
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV12, TextureGUIDs));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV12, TextureGUIDs2));
@@ -551,8 +551,8 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 	_vseginfo_t cpuseginfo = RePak::CreateNewSegment(sizeof(MaterialCPUHeader) + cpuDataSize, 3, 16);
 
 	MaterialCPUHeader cpuhdr{};
-	cpuhdr.m_nUnknownRPtr.m_nIndex = cpuseginfo.index;
-	cpuhdr.m_nUnknownRPtr.m_nOffset = sizeof(MaterialCPUHeader);
+	cpuhdr.m_nUnknownRPtr.index = cpuseginfo.index;
+	cpuhdr.m_nUnknownRPtr.offset = sizeof(MaterialCPUHeader);
 	cpuhdr.m_nDataSize = cpuDataSize;
 
 	RePak::RegisterDescriptor(cpuseginfo.index, 0);
@@ -635,9 +635,9 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 	RPakAssetEntry asset;
 
 	asset.InitAsset(RTech::StringToGuid(sFullAssetRpakPath.c_str()), subhdrinfo.index, 0, subhdrinfo.size, cpuseginfo.index, 0, -1, -1, (std::uint32_t)AssetType::MATL);
-	asset.m_nVersion = version;
+	asset.version = version;
 
-	asset.m_nPageEnd = cpuseginfo.index + 1;
+	asset.pageEnd = cpuseginfo.index + 1;
 	// this isn't even fully true in some apex materials.
 	//asset.unk1 = bColpass ? 7 : 8; // what
 	// unk1 appears to be maxusecount, although seemingly nothing is affected by changing it unless you exceed 18.
@@ -645,7 +645,7 @@ void Assets::AddMaterialAsset_v12(std::vector<RPakAssetEntry>* assetEntries, con
 	asset.unk1 = assetUsesCount + 1;
 
 	asset.m_nUsesStartIdx = fileRelationIdx;
-	asset.m_nUsesCount = assetUsesCount;
+	asset.usesCount = assetUsesCount;
 
 	assetEntries->push_back(asset);
 }
@@ -680,10 +680,10 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	//    mtlHdr->StreamableTextureCount = mapEntry["signature"].GetInt();
 
 	if (mapEntry.HasMember("width")) // Set material width.
-		mtlHdr->m_nWidth = mapEntry["width"].GetInt();
+		mtlHdr->width = mapEntry["width"].GetInt();
 
 	if (mapEntry.HasMember("height")) // Set material width.
-		mtlHdr->m_nHeight = mapEntry["height"].GetInt();
+		mtlHdr->height = mapEntry["height"].GetInt();
 
 	if (mapEntry.HasMember("flags")) // Set flags properly. Responsible for texture stretching, tiling etc.
 		mtlHdr->m_SomeFlags = mapEntry["flags"].GetUint();
@@ -747,7 +747,7 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 			RPakAssetEntry* txtrAsset = RePak::GetAssetByGuid(assetEntries, textureGUID, nullptr);
 
 			txtrAsset->m_nRelationsStartIdx = fileRelationIdx;
-			txtrAsset->m_nRelationsCounts++;
+			txtrAsset->relationCount++;
 
 			assetUsesCount++;
 		}
@@ -765,11 +765,11 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 
 	// ===============================
 	// fill out the rest of the header
-	mtlHdr->m_pszName.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pszName.m_nOffset = 0;
+	mtlHdr->m_pszName.index = dataseginfo.index;
+	mtlHdr->m_pszName.offset = 0;
 
-	mtlHdr->m_pszSurfaceProp.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pszSurfaceProp.m_nOffset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2);
+	mtlHdr->m_pszSurfaceProp.index = dataseginfo.index;
+	mtlHdr->m_pszSurfaceProp.offset = (sAssetPath.length() + 1) + assetPathAlignment + (textureRefSize * 2);
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pszName));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pszSurfaceProp));
@@ -851,11 +851,11 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 		bColpass = true;
 	}
 
-	mtlHdr->m_pTextureHandles.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pTextureHandles.m_nOffset = guidPageOffset;
+	mtlHdr->m_pTextureHandles.index = dataseginfo.index;
+	mtlHdr->m_pTextureHandles.offset = guidPageOffset;
 
-	mtlHdr->m_pStreamingTextureHandles.m_nIndex = dataseginfo.index;
-	mtlHdr->m_pStreamingTextureHandles.m_nOffset = guidPageOffset + textureRefSize;
+	mtlHdr->m_pStreamingTextureHandles.index = dataseginfo.index;
+	mtlHdr->m_pStreamingTextureHandles.offset = guidPageOffset + textureRefSize;
 
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pTextureHandles));
 	RePak::RegisterDescriptor(subhdrinfo.index, offsetof(MaterialHeaderV15, m_pStreamingTextureHandles));
@@ -933,11 +933,11 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	std::uint64_t cpuDataSize = sizeof(MaterialCPUDataV15);
 
 	// cpu data
-	_vseginfo_t cpuseginfo = RePak::CreateNewSegment(sizeof(MaterialCPUHeader) + cpuDataSize, SF_CPU | SF_UNK2, 16);
+	_vseginfo_t cpuseginfo = RePak::CreateNewSegment(sizeof(MaterialCPUHeader) + cpuDataSize, SF_CPU | SF_TEMP, 16);
 
 	MaterialCPUHeader cpuhdr{};
-	cpuhdr.m_nUnknownRPtr.m_nIndex = cpuseginfo.index;
-	cpuhdr.m_nUnknownRPtr.m_nOffset = sizeof(MaterialCPUHeader);
+	cpuhdr.m_nUnknownRPtr.index = cpuseginfo.index;
+	cpuhdr.m_nUnknownRPtr.offset = sizeof(MaterialCPUHeader);
 	cpuhdr.m_nDataSize = cpuDataSize;
 
 	RePak::RegisterDescriptor(cpuseginfo.index, 0);
@@ -961,14 +961,14 @@ void Assets::AddMaterialAsset_v15(std::vector<RPakAssetEntry>* assetEntries, con
 	RPakAssetEntry asset;
 
 	asset.InitAsset(RTech::StringToGuid(sFullAssetRpakPath.c_str()), subhdrinfo.index, 0, subhdrinfo.size, cpuseginfo.index, 0, -1, -1, (std::uint32_t)AssetType::MATL);
-	asset.m_nVersion = MATL_VERSION;
+	asset.version = MATL_VERSION;
 
-	asset.m_nPageEnd = cpuseginfo.index + 1;
+	asset.pageEnd = cpuseginfo.index + 1;
 
 	asset.m_nUsesStartIdx = fileRelationIdx;
-	asset.m_nUsesCount = assetUsesCount;
+	asset.usesCount = assetUsesCount;
 
-	asset.unk1 = asset.m_nUsesCount + 1;
+	asset.unk1 = asset.usesCount + 1;
 
 	assetEntries->push_back(asset);
 }

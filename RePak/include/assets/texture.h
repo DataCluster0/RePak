@@ -5,31 +5,30 @@
 #pragma pack(push, 1)
 struct TextureHeader
 {
-	uint64_t m_nAssetGUID = 0;
-	RPakPtr  m_pDebugName;
+	uint64_t guid = 0;
+	RPakPtr  pName;
 
-	uint16_t m_nWidth = 0;
-	uint16_t m_nHeight = 0;
+	uint16_t width = 0;
+	uint16_t height = 0;
 
 	uint16_t unk0 = 0;
-	uint16_t m_nFormat = 0;
+	uint16_t imgFormat = 0;
 
-	uint32_t m_nDataLength; // total data size across all sources
+	uint32_t dataSize; // total data size across all sources
 	uint8_t  unk1;
-	uint8_t  m_nOptStreamedMipLevels; // why is this here and not below? respawn moment
+	uint8_t  optStreamedMipLevels; // why is this here and not below? respawn moment
 
 	// d3d11 texture desc params
-	uint8_t  m_nArraySize;
-	uint8_t  m_nLayerCount;
+	uint8_t  arraySize;
+	uint8_t  layerCount;
 
 	uint8_t  unk2;
-	uint8_t  m_nPermanentMipLevels;
-	uint8_t  m_nStreamedMipLevels;
+	uint8_t  mipLevels;
+	uint8_t  streamedMipLevels;
 	uint8_t  unk3[0x15];
 };
 
 #pragma pack(pop)
-
 
 // map of dxgi format to the corresponding txtr asset format value
 static std::map<DXGI_FORMAT, uint16_t> s_txtrFormatMap{

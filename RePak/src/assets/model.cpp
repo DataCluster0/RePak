@@ -310,15 +310,15 @@ void Assets::AddModelAsset_v9(std::vector<RPakAssetEntry>* assetEntries, const c
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, de.m_nOffset, -1, (std::uint32_t)AssetType::RMDL);
-	asset.m_nVersion = RMDL_VERSION;
+	asset.version = RMDL_VERSION;
 	// i have literally no idea what these are
-	asset.m_nPageEnd = lastPageIdx + 1;
+	asset.pageEnd = lastPageIdx + 1;
 
 	size_t fileRelationIdx = RePak::AddFileRelation(assetEntries->size());
 	asset.m_nUsesStartIdx = fileRelationIdx;
 
-	asset.m_nUsesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
-	asset.unk1 = asset.m_nUsesCount + 1;
+	asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
+	asset.unk1 = asset.usesCount + 1;
 
 	assetEntries->push_back(asset);
 }
