@@ -202,6 +202,8 @@ void Assets::AddSettingsLayoutAsset(RPakFileBase* pak, std::vector<RPakAssetEntr
 
 void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
+	std::vector<RPakGuidDescriptor> guids{};
+
 	std::string sAssetName = assetPath;
 	sAssetName = "settings/" + sAssetName + ".rpak";
 	uint32_t assetPathSize = (sAssetName.length() + 1);
@@ -236,7 +238,7 @@ void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	}
 	else Error("Required field 'layout' not found for settings item. Exiting...\n");
 
-	pak->AddGuidDescriptor(subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
+	pak->AddGuidDescriptor(&guids,subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
 
 	uint32_t nameBufSize = sAssetName.length() + 1;
 	_vseginfo_t nameinfo = pak->CreateNewSegment(nameBufSize, SF_CPU, assetPathSize % 4);

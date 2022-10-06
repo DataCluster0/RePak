@@ -169,7 +169,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	// static name for now
 	pak->AddStarpakReference(starpakPath);
 
-	SRPkDataEntry de = pak->AddStarpakDataEntry( { 0, vgFileSize, (uint8_t*)pVGBuf } );
+	SRPkDataEntry de = pak->AddStarpakDataEntry({ 0, vgFileSize, (uint8_t*)pVGBuf });
 
 	pHdr->alignedStreamingSize = de.m_nDataSize;
 
@@ -208,6 +208,8 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 		pak->AddPointer(subhdrinfo.index, offsetof(ModelHeader, pPhyData));
 	}
 
+	std::vector<RPakGuidDescriptor> guids{};
+
 	// anim rigs are "includemodels" from source, containing a very stripped version of the main .rmdl data without any meshes
 	// they are used for sharing anim data between models
 	// file extension is ".rrig", rpak asset id is "arig"
@@ -218,7 +220,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 
 		for (int i = 0; i < pHdr->animRigCount; ++i)
 		{
-			pak->AddGuidDescriptor(arigseginfo.index, sizeof(uint64_t) * i);
+			pak->AddGuidDescriptor(&guids, arigseginfo.index, sizeof(uint64_t) * i);
 		}
 	}
 
@@ -230,7 +232,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 
 		for (int i = 0; i < pHdr->animSeqCount; ++i)
 		{
-			pak->AddGuidDescriptor(aseqseginfo.index, sizeof(uint64_t) * i);
+			pak->AddGuidDescriptor(&guids, aseqseginfo.index, sizeof(uint64_t) * i);
 		}
 	}
 
@@ -276,35 +278,30 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 		Log("Material Guid -> 0x%llX\n", material->guid);
 
 		if (material->guid != 0)
-			pak->AddGuidDescriptor(dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
+			pak->AddGuidDescriptor(&guids, dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));
 	}
 
-	RPakRawDataBlock shdb{ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr };
-	pak->AddRawDataBlock(shdb);
+	pak->AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
 
-	RPakRawDataBlock rdb{ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf };
-	pak->AddRawDataBlock(rdb);
+	pak->AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
 
 	uint32_t lastPageIdx = dataseginfo.index;
 
 	if (phyBuf)
 	{
-		RPakRawDataBlock phydb{ physeginfo.index, physeginfo.size, (uint8_t*)phyBuf };
-		pak->AddRawDataBlock(phydb);
+		pak->AddRawDataBlock({ physeginfo.index, physeginfo.size, (uint8_t*)phyBuf });
 		lastPageIdx = physeginfo.index;
 	}
 
 	if (pAnimRigBuf)
 	{
-		RPakRawDataBlock arigdb{ arigseginfo.index, arigseginfo.size, (uint8_t*)pAnimRigBuf };
-		pak->AddRawDataBlock(arigdb);
+		pak->AddRawDataBlock({ arigseginfo.index, arigseginfo.size, (uint8_t*)pAnimRigBuf });
 		lastPageIdx = arigseginfo.index;
 	}
 
 	if (pAnimSeqBuf)
 	{
-		RPakRawDataBlock aseqdb{ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf };
-		pak->AddRawDataBlock(aseqdb);
+		pak->AddRawDataBlock({ aseqseginfo.index, aseqseginfo.size, (uint8_t*)pAnimSeqBuf });
 		lastPageIdx = aseqseginfo.index;
 	}
 
@@ -314,11 +311,14 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	// i have literally no idea what these are
 	asset.pageEnd = lastPageIdx + 1;
 
-	size_t fileRelationIdx = pak->AddFileRelation(assetEntries->size());
-	asset.usesStartIdx = fileRelationIdx;
+	// this needs to be fixed!!!
+	//size_t fileRelationIdx = pak->AddFileRelation(assetEntries->size());
+	//asset.usesStartIdx = fileRelationIdx;
+	//asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount;
 
 	asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
 	asset.unk1 = asset.usesCount + 1;
 
+	asset.AddGuids(&guids);
 	assetEntries->push_back(asset);
 }

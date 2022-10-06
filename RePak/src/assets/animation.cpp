@@ -11,6 +11,8 @@ void Assets::AddRigAsset_stub(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 
 void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
+	std::vector<RPakGuidDescriptor> guids{};
+
 	Log("\n==============================\n");
 	Log("Asset arig -> '%s'\n", assetPath);
 
@@ -98,11 +100,11 @@ void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* asse
 
 		DataWriter.write<uint64_t>(RTech::StringToGuid(Entry.GetStdString().c_str()), Offset);
 
-		pak->AddGuidDescriptor(dataseginfo.index, Offset);
+		pak->AddGuidDescriptor(&guids, dataseginfo.index, Offset);
 	}
 
-	pak->AddRawDataBlock( { subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr } );
-	pak->AddRawDataBlock( { dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf } );
+	pak->AddRawDataBlock({ subhdrinfo.index, subhdrinfo.size, (uint8_t*)pHdr });
+	pak->AddRawDataBlock({ dataseginfo.index, dataseginfo.size, (uint8_t*)pDataBuf });
 
 	RPakAssetEntry asset;
 	asset.InitAsset(RTech::StringToGuid(sAssetName.c_str()), subhdrinfo.index, 0, subhdrinfo.size, -1, 0, -1, -1, (std::uint32_t)AssetType::ARIG);
@@ -111,12 +113,13 @@ void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* asse
 
 	asset.pageEnd = dataseginfo.index + 1;
 
-	asset.usesStartIdx = pak->AddFileRelation(assetEntries->size());
+	//asset.usesStartIdx = pak->AddFileRelation(assetEntries->size());
 	asset.relationCount = 1;
 
 	asset.usesCount = pHdr->AseqRefCount;
 	asset.unk1 = asset.usesCount + 1; // uses + 1
 
+	asset.AddGuids(&guids);
 	assetEntries->push_back(asset);
 }
 
@@ -133,8 +136,7 @@ void Assets::AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	while (!IsDebuggerPresent())
 		::Sleep(100);
 
-
-	auto SEAnimData = SEAsset::ReadAnimation(Utils::ChangeExtension(FilePath, ".seanim"), Utils::ChangeExtension(sAssetName,".seanim"));
+	auto SEAnimData = SEAsset::ReadAnimation(Utils::ChangeExtension(FilePath, ".seanim"), Utils::ChangeExtension(sAssetName, ".seanim"));
 
 	AnimHeader* pHdr = new AnimHeader();
 
@@ -146,7 +148,6 @@ void Assets::AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	char* pDataBuf = new char[DataBufferSize];
 
 	snprintf(pDataBuf, NameDataSize, "%s", sAssetName.c_str());
-
 
 	//if (mapEntry.HasMember("animseqs") && mapEntry["animseqs"].IsArray())
 	//{

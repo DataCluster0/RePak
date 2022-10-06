@@ -3,8 +3,6 @@
 #include <d3d11.h>
 #include <pch.h>
 
-
-
 #define SF_HEAD   0 // :skull:
 #define SF_CPU    (1 << 0)
 #define SF_TEMP   (1 << 1)
@@ -42,6 +40,7 @@ struct RPakPtr
 	uint32_t m_nIndex = 0;
 	uint32_t m_nOffset = 0;
 };
+
 // generic header struct for both apex and titanfall 2
 // contains all the necessary members for both, RPakFileBase::WriteHeader decides
 // which should be written depending on the version
@@ -198,6 +197,23 @@ struct RPakAssetEntry
 
 	// see AssetType enum below
 	uint32_t id = 0;
+
+	// internal
+
+	// vector of indexes for local assets that use this asset
+	std::vector<unsigned int> _relations{};
+
+	inline void AddRelation(unsigned int idx) { _relations.push_back({ idx }); };
+
+	std::vector<RPakGuidDescriptor> _guids{};
+
+	inline void AddGuid(RPakGuidDescriptor desc) { _guids.push_back(desc); };
+
+	inline void AddGuids(std::vector<RPakGuidDescriptor>* descs)
+	{
+		for (auto& it : *descs)
+			_guids.push_back(it);
+	};
 };
 
 #pragma pack(pop)

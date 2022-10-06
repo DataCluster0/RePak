@@ -110,9 +110,6 @@ void Assets::AddUIImageAsset_v10(RPakFileBase* pak, std::vector<RPakAssetEntry>*
 	pak->AddPointer(subhdrinfo.index, offsetof(UIImageHeader, pTextureDimensions));
 	pak->AddPointer(subhdrinfo.index, offsetof(UIImageHeader, pTextureHashes));
 
-	// textureGUID descriptors
-	pak->AddGuidDescriptor(subhdrinfo.index, offsetof(UIImageHeader, atlasGUID));
-
 	// buffer for texture info data
 	char* pTextureInfoBuf = new char[textureInfoPageSize] {};
 	rmem tiBuf(pTextureInfoBuf);
@@ -166,10 +163,10 @@ void Assets::AddUIImageAsset_v10(RPakFileBase* pak, std::vector<RPakAssetEntry>*
 	}
 
 	// add the file relation from this uimg asset to the atlas txtr
-	size_t fileRelationIdx = pak->AddFileRelation(assetEntries->size());
-
-	atlasAsset->relStartIdx = fileRelationIdx;
-	atlasAsset->relationCount++;
+	if (atlasAsset)
+		atlasAsset->AddRelation(assetEntries->size());
+	else
+		Warning("unable to find texture asset locally for uimg asset. assuming it is external...\n");
 
 	char* pUVBuf = new char[nTexturesCount * sizeof(UIImageUV)];
 	rmem uvBuf(pUVBuf);
@@ -205,10 +202,11 @@ void Assets::AddUIImageAsset_v10(RPakFileBase* pak, std::vector<RPakAssetEntry>*
 
 	asset.pageEnd = dataseginfo.index + 1; // number of the highest page that the asset references pageidx + 1
 
-
-	asset.usesStartIdx = fileRelationIdx;
 	asset.usesCount = 1; // the asset should only use 1 other asset for the atlas
 	asset.unk1 = asset.usesCount + 1;
+
+	// this asset only has one guid reference so im just gonna do it here
+	asset.AddGuid({ subhdrinfo.index, offsetof(UIImageHeader, atlasGUID) });
 
 	// add the asset entry
 	assetEntries->push_back(asset);
