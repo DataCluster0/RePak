@@ -944,188 +944,25 @@ struct AnimHeader
 	RPakPtr pModelHash{};
 };
 
-struct mstudioanimtag_t
-{
-	int					tag;
-	float				cycle;
-
-	int					sztagindex;
-	inline char* const pszTagName(void) const { return ((char*)this) + sztagindex; }
-};
-
-struct mstudioactivitymodifier_t
-{
-	int					sznameindex;
-	inline char* pszName() { return (sznameindex) ? (char*)(((byte*)this) + sznameindex) : NULL; }
-};
-
-struct mstudioiklock_t
-{
-	int			chain;
-	float		flPosWeight;
-	float		flLocalQWeight;
-	int			flags;
-
-	int			unused[4];
-};
-
-struct mstudioautolayer_t
-{
-	//private:
-	short				iSequence;
-	short				iPose;
-	//public:
-	int					flags;
-	float				start;	// beginning of influence
-	float				peak;	// start of full influence
-	float				tail;	// end of full influence
-	float				end;	// end of all influence
-};
-
-
-struct mstudioevent_t
-{
-	float				cycle;
-	int					event;
-	int					type;
-	inline const char* pszOptions(void) const { return options; }
-	char				options[64];
-
-	int					szeventindex;
-	inline char* const pszEventName(void) const { return ((char*)this) + szeventindex; }
-};
-
 struct mstudioseqdesc_t
 {
-	int					baseptr;
-	//inline studiohdr_t* pStudiohdr(void) const { return (studiohdr_t*)(((byte*)this) + baseptr); }
+	int baseptr = 0;
+	int szlabelindex;
+	int szactivitynameindex;
+	int flags;
 
-	int					szlabelindex;
-	inline char* const pszLabel(void) const { return ((char*)this) + szlabelindex; }
+	Anim_Activity activity = Anim_Activity::ACT_NONE;
+	int actweight;
 
-	int					szactivitynameindex;
-	inline char* const pszActivityName(void) const { return ((char*)this) + szactivitynameindex; }
+	int numevents;
+	int eventindex;
 
-	int					flags;		// looping/non-looping flags
+	Vector3 bbmin;
+	Vector3 bbmax;
 
-	Anim_Activity activity = Anim_Activity::ACT_NONE;	// initialized at loadtime to game DLL values
-	int					actweight;
-
-	int					numevents;
-	int					eventindex;
-	inline mstudioevent_t* pEvent(int i) const { return (mstudioevent_t*)(((byte*)this) + eventindex) + i; };
-
-	Vector3				bbmin;		// per sequence bounding box
-	Vector3				bbmax;
-
-	int					numblends;
-
-	// Index into array of shorts which is groupsize[0] x groupsize[1] in length
-	int					animindexindex;
-
-	inline int			anim(int x, int y) const
-	{
-		if (x >= groupsize[0])
-		{
-			x = groupsize[0] - 1;
-		}
-
-		if (y >= groupsize[1])
-		{
-			y = groupsize[1] - 1;
-		}
-
-		int offset = y * groupsize[0] + x;
-		short* blends = (short*)(((byte*)this) + animindexindex);
-		int value = (int)blends[offset];
-		return value;
-	}
-
-	int					movementindex;	// [blend] float array for blended movement
-	int					groupsize[2];
-	int					paramindex[2];	// X, Y, Z, XR, YR, ZR
-	float				paramstart[2];	// local (0..1) starting value
-	float				paramend[2];	// local (0..1) ending value
-	int					paramparent;
-
-	float				fadeintime;		// ideal cross fate in time (0.2 default)
-	float				fadeouttime;	// ideal cross fade out time (0.2 default)
-
-	int					localentrynode;		// transition node at entry
-	int					localexitnode;		// transition node at exit
-	int					nodeflags;		// transition rules
-
-	float				entryphase;		// used to match entry gait
-	float				exitphase;		// used to match exit gait
-
-	float				lastframe;		// frame that should generation EndOfSequence
-
-	int					nextseq;		// auto advancing sequences
-	int					pose;			// index of delta animation between end and nextseq
-
-	int					numikrules;
-
-	int					numautolayers;	//
-	int					autolayerindex;
-	inline mstudioautolayer_t* pAutolayer(int i) const { return (mstudioautolayer_t*)(((byte*)this) + autolayerindex) + i; };
-
-	int					weightlistindex;
-	inline float* pBoneweight(int i) const { return ((float*)(((byte*)this) + weightlistindex) + i); };
-	inline float		weight(int i) const { return *(pBoneweight(i)); };
-
-	// FIXME: make this 2D instead of 2x1D arrays
-	int					posekeyindex;
-	float* pPoseKey(int iParam, int iAnim) const { return (float*)(((byte*)this) + posekeyindex) + iParam * groupsize[0] + iAnim; }
-	float				poseKey(int iParam, int iAnim) const { return *(pPoseKey(iParam, iAnim)); }
-
-	int					numiklocks;
-	int					iklockindex;
-	inline mstudioiklock_t* pIKLock(int i) const {  return (mstudioiklock_t*)(((byte*)this) + iklockindex) + i; };
-
-	// Key values
-	int					keyvalueindex;
-	int					keyvaluesize;
-	inline const char* KeyValueText(void) const { return keyvaluesize != 0 ? ((char*)this) + keyvalueindex : NULL; }
-
-	int					cycleposeindex;		// index of pose parameter to use as cycle index
-
-	int					activitymodifierindex;
-	int					numactivitymodifiers;
-	inline mstudioactivitymodifier_t* pActivityModifier(int i) const { return activitymodifierindex != 0 ? (mstudioactivitymodifier_t*)(((byte*)this) + activitymodifierindex) + i : NULL; };
-
-	int					animtagindex;
-	int					numanimtags;
-	inline mstudioanimtag_t* pAnimTag(int i) const {return (mstudioanimtag_t*)(((byte*)this) + animtagindex) + i; };
-
-	int					rootDriverIndex;
-
-	int					unused[2];		// remove/add as appropriate (grow back to 8 ints on version change!)
-
+	int numblends;
+	int animindexindex;
 };
-
-
-
-
-
-//struct mstudioseqdesc_t
-//{
-//	int baseptr = 0;
-//	int szlabelindex;
-//	int szactivitynameindex;
-//	int flags;
-//
-//	Anim_Activity activity = Anim_Activity::ACT_NONE;
-//	int actweight;
-//
-//	int numevents;
-//	int eventindex;
-//
-//	Vector3 bbmin;
-//	Vector3 bbmax;
-//
-//	int numblends;
-//	int animindexindex;
-//};
 
 struct mstudioanimdescv54_t
 {

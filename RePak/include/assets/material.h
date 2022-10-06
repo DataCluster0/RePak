@@ -139,7 +139,6 @@ struct MaterialHeaderV12
 enum MatVisFlags : uint16_t
 {
 	None = 0x0,
-	Inverted = 0x1,
 	Colpass = 0x5,
 	Transparent = 0x7,
 	Opaque = 0x17
@@ -150,7 +149,7 @@ enum MatRenderFlags : uint16_t
 	Default = 0x0,
 	Wireframe = 0x1,
 	Culling = 0x2,
-	inverted = 0x4,
+	Inverted = 0x4,
 	NoCulling = 0x6,
 	Unknown = 0x8,
 };

@@ -324,8 +324,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 
 	//asset.relationCount = relations;
 
-	asset.usesCount = mdlhdr.numtextures + pHdr->animRigCount + pHdr->animSeqCount;
-	asset.unk1 = asset.usesCount + 1;
+	asset.unk1 = guids.size() + 1;
 
 	asset.AddGuids(&guids);
 	assetEntries->push_back(asset);

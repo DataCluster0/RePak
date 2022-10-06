@@ -116,8 +116,8 @@ void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* asse
 	//asset.usesStartIdx = pak->AddFileRelation(assetEntries->size());
 	asset.relationCount = 1;
 
-	asset.usesCount = pHdr->AseqRefCount;
-	asset.unk1 = asset.usesCount + 1; // uses + 1
+	//asset.usesCount = guids.size();
+	asset.unk1 = guids.size() + 1; // uses + 1
 
 	asset.AddGuids(&guids);
 	assetEntries->push_back(asset);
