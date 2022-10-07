@@ -650,7 +650,7 @@ void Assets::AddMaterialAsset_v15(RPakFileBase* pak, std::vector<RPakAssetEntry>
 
 	mtlHdr->m_nGUID = RTech::StringToGuid(sFullAssetRpakPath.c_str()); // Convert full rpak asset path to textureGUID and set it in the material header.
 
-	// Game ignores this field when parsing, retail rpaks also have this as 0. But In-Game its being set to either 0x4, 0x5, 0x9.
+    // Game ignores this field when parsing, retail rpaks also have this as 0. But In-Game its being set to either 0x4, 0x5, 0x9.
 	// Based on resolution.
 	// 512x512 = 0x5
 	// 1024x1024 = 0x4
@@ -798,8 +798,14 @@ void Assets::AddMaterialAsset_v15(RPakFileBase* pak, std::vector<RPakAssetEntry>
 		mtlHdr->m_pShaderSet = 0x2a2db3a47af9b3d5;
 	}
 
-	if (mapEntry.HasMember("shaderset") && mapEntry["shaderset"].IsUint64() && mapEntry["shaderset"].GetUint64() != 0x0)
-		mtlHdr->m_pShaderSet = mapEntry["shaderset"].GetUint64();
+	if (mapEntry.HasMember("shaderset"))
+	{
+		if(mapEntry["shaderset"].IsString() && mapEntry["shaderset"].GetStdString() != "")
+			mtlHdr->m_pShaderSet = RTech::StringToGuid(mapEntry["shaderset"].GetStdString().c_str());
+		else if (mapEntry["shaderset"].IsUint64() && mapEntry["shaderset"].GetUint64() != 0)
+			mtlHdr->m_pShaderSet = mapEntry["shaderset"].GetUint64();
+	}
+		
 
 	pak->AddGuidDescriptor(&guids, subhdrinfo.index, offsetof(MaterialHeaderV15, m_pShaderSet));
 

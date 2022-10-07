@@ -2,7 +2,7 @@
 
 #include <pch.h>
 
-#pragma pack(push, 1)
+#pragma pack(push, 2)
 struct TextureHeader
 {
 	uint64_t guid = 0;

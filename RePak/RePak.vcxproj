@@ -155,6 +155,7 @@
     <ClCompile Include="src\assets\patch.cpp" />
     <ClCompile Include="src\assets\rui.cpp" />
     <ClCompile Include="src\assets\settings.cpp" />
+    <ClCompile Include="src\assets\shader.cpp" />
     <ClCompile Include="src\assets\texture.cpp" />
     <ClCompile Include="src\math\Half.cpp" />
     <ClCompile Include="src\math\Matrix.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="include\assets\patch.h" />
     <ClInclude Include="include\assets\rui.h" />
     <ClInclude Include="include\assets\settings.h" />
+    <ClInclude Include="include\assets\shader.h" />
     <ClInclude Include="include\assets\texture.h" />
     <ClInclude Include="include\BinaryIO.h" />
     <ClInclude Include="include\dxutils.h" />

@@ -105,6 +105,9 @@
     <ClCompile Include="src\math\Half.cpp">
       <Filter>Source Files\math</Filter>
     </ClCompile>
+    <ClCompile Include="src\assets\shader.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\rapidjson\allocators.h">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="include\math\MathHelper.h">
       <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\assets\shader.h">
+      <Filter>Header Files\assets</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
