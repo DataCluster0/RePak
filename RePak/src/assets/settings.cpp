@@ -241,7 +241,7 @@ void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	pak->AddGuidDescriptor(&guids,subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
 
 	uint32_t nameBufSize = sAssetName.length() + 1;
-	_vseginfo_t nameinfo = pak->CreateNewSegment(nameBufSize, SF_CPU, assetPathSize % 4);
+	_vseginfo_t nameinfo = pak->CreateNewSegment(nameBufSize, SF_CPU, 64);
 	char* nameData = new char[nameBufSize];
 	{
 		snprintf(nameData, sAssetName.length() + 1, "%s", sAssetName.c_str());
@@ -258,11 +258,11 @@ void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	ValueBufferSize += sizeof(uint64_t);
 
 	// item data
-	_vseginfo_t valueinfo = pak->CreateNewSegment(ValueBufferSize, SF_CPU, 8);
+	_vseginfo_t valueinfo = pak->CreateNewSegment(ValueBufferSize, SF_CPU, 64);
 	hdr->Values = { valueinfo.index , 0 };
 
 	// string buffer data
-	_vseginfo_t stringbufinfo = pak->CreateNewSegment(StringBufferSize, SF_CPU, 8);
+	_vseginfo_t stringbufinfo = pak->CreateNewSegment(StringBufferSize, SF_CPU, 64);
 	hdr->StringBuf = { stringbufinfo.index , 0 };
 
 	char* ValueBufferData = new char[ValueBufferSize];

@@ -65,8 +65,8 @@ public:
 
 		//ASSET_HANDLER("stlt", file, assets, Assets::AddSettingsLayoutAsset, Assets::AddSettingsLayoutAsset);
 		//ASSET_HANDLER("stgs", file, m_Assets, Assets::AddSettingsAsset, Assets::AddSettingsAsset);
-		//ASSET_HANDLER("arig", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
-		//ASSET_HANDLER("aseq", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRseqAssets_v7);
+		ASSET_HANDLER("arig", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
+		ASSET_HANDLER("aseq", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRseqAssets_v7);
 
 	};
 

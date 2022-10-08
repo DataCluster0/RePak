@@ -68,7 +68,7 @@ void Assets::AddRigAsset_v4(RPakFileBase* pak, std::vector<RPakAssetEntry>* asse
 	_vseginfo_t subhdrinfo = pak->CreateNewSegment(sizeof(AnimRigHeader), SF_HEAD, 16);
 
 	// data segment
-	_vseginfo_t dataseginfo = pak->CreateNewSegment(DataBufferSize, SF_CPU, 64);
+	_vseginfo_t dataseginfo = pak->CreateNewSegment(DataBufferSize, SF_CPU, 8);
 
 	// write the rrig file path into the data buffer
 	snprintf(pDataBuf, NameDataSize, "%s", sAssetName.c_str());

@@ -3,7 +3,28 @@
 #include <pch.h>
 
 #pragma pack(push, 2)
+enum ShaderType : uint8_t
+{
+	Pixel,
+	Vertex,
+	Geometry,
+	Hardware,
+	Domain,
+	Compute
+};
 
+struct TextureSlotData
+{
+	uint16_t unk1;
+	uint16_t unk2;
+	uint16_t unk3;
+	uint16_t unk4;
+
+	uint16_t unk5;
+	uint16_t unk6;
+	uint16_t unk7;
+	uint16_t unk8;
+};
 
 
 // --- shdr ---
@@ -11,12 +32,26 @@ struct ShaderHeader
 {
 	RPakPtr pName{};
 
-	uint64_t DataSize;
+	ShaderType ShaderType;
+	uint8_t unk = 255;
+	uint16_t min_widthheight = 1;
 
-	RPakPtr pIndex1{};
+	uint16_t max_width = 512;
+	uint16_t max_height = 512;
 
-	RPakPtr pIndex2{};
+	RPakPtr pIndex0{};
+
+	RPakPtr pTextureSlotData{};
 };
+
+int size = sizeof(ShaderHeader);
+
+
+struct TextureSlot
+{
+
+};
+
 
 // --- shds ---
 struct ShaderSetHeader {
