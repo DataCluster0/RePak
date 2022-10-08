@@ -50,11 +50,11 @@ public:
 	unsigned __int64 getPosition() { return this->_curpos; };
 
 public: // read/write
-	
+
 	// params:
 	// advancebuf - whether the current position should be updated after reading
 	template <typename T>
-	T read(bool advancebuf=true)
+	T read(bool advancebuf = true)
 	{
 		if (_curpos + sizeof(T) > _bufsize)
 			throw "failed to read from buffer: attempted to read past the end of the buffer";
@@ -73,7 +73,7 @@ public: // read/write
 	template <typename T>
 	T* get()
 	{
-		if(_curpos + sizeof(T) > _bufsize)
+		if (_curpos + sizeof(T) > _bufsize)
 			throw "failed to get ptr from buffer: attempted to read past the end of the buffer";
 
 		T* ptr = (T*)_pbuf;
@@ -99,11 +99,9 @@ public: // read/write
 		if (offset > _bufsize)
 			throw "failed to write to buffer: attempted to write past the end of the buffer";
 
-
 		*(T*)((char*)_pbase + offset) = val;
 	}
 
-//private: // internal helper stuff
-	//void _AdvanceBuffer(unsigned __int64 amount);
+	//private: // internal helper stuff
+		//void _AdvanceBuffer(unsigned __int64 amount);
 };
-

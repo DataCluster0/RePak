@@ -26,7 +26,6 @@ struct TextureSlotData
 	uint16_t unk8;
 };
 
-
 // --- shdr ---
 struct ShaderHeader
 {
@@ -46,12 +45,9 @@ struct ShaderHeader
 
 int size = sizeof(ShaderHeader);
 
-
 struct TextureSlot
 {
-
 };
-
 
 // --- shds ---
 struct ShaderSetHeader {

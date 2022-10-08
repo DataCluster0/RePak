@@ -219,12 +219,10 @@ void Assets::AddShaderAsset_v12(RPakFileBase* pak, std::vector<RPakAssetEntry>* 
 
 	ShaderDataHeader SDRData;
 	{
-		
 		SDRData.DataSize = shdrFileSize;
 		SDRData.pData = { dataseginfo.index, sizeof(ShaderDataHeader) };
 		// write shaderdata
 		writer.write(SDRData, 0);
-
 
 		pHdr->pIndex0 = { metadataseginfo.index, 0 };
 		pHdr->pTextureSlotData = { metadataseginfo.index, (16 * Textures) };

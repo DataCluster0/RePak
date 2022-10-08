@@ -263,7 +263,7 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 			else if (it.IsUint64() && it.GetUint64() != 0x0)
 			{
 				MaterialOverrides.push_back(it.GetUint64());
-			} 
+			}
 		}
 	}
 
@@ -283,7 +283,6 @@ void Assets::AddModelAsset_v9(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 		}
 
 		Log("Material Guid -> 0x%llX\n", material->guid);
-
 
 		if (material->guid != 0)
 			pak->AddGuidDescriptor(&guids, dataseginfo.index, dataBuf.getPosition() + offsetof(materialref_t, guid));

@@ -238,7 +238,7 @@ void Assets::AddSettingsAsset(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	}
 	else Error("Required field 'layout' not found for settings item. Exiting...\n");
 
-	pak->AddGuidDescriptor(&guids,subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
+	pak->AddGuidDescriptor(&guids, subhdrinfo.index, offsetof(SettingsHeader, LayoutGUID));
 
 	uint32_t nameBufSize = sAssetName.length() + 1;
 	_vseginfo_t nameinfo = pak->CreateNewSegment(nameBufSize, SF_CPU, 64);

@@ -171,7 +171,6 @@
     <ClCompile Include="src\RePak.cpp" />
     <ClCompile Include="src\rmem.cpp" />
     <ClCompile Include="src\rtech.cpp" />
-    <ClCompile Include="src\SEAsset.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -237,7 +236,6 @@
     <ClInclude Include="include\rmem.h" />
     <ClInclude Include="include\rpak.h" />
     <ClInclude Include="include\rtech.h" />
-    <ClInclude Include="include\SEAsset.h" />
     <ClInclude Include="include\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

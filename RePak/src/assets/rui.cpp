@@ -3,7 +3,6 @@
 #include "assets/rui.h"
 #include <dxutils.h>
 
-
 void Assets::AddUIImageAsset_v10(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
 	Log("\n==============================\n");

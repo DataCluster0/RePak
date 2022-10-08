@@ -2,7 +2,6 @@
 #include "Assets.h"
 #include "assets/model.h"
 #include "assets/animation.h"
-#include "SeAsset.h"
 
 void Assets::AddRigAsset_stub(RPakFileBase* pak, std::vector<RPakAssetEntry>* assetEntries, const char* assetPath, rapidjson::Value& mapEntry)
 {
@@ -127,16 +126,12 @@ void Assets::AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 {
 	std::string sAssetName = assetPath;
 	sAssetName = sAssetName + ".rseq";
-
 	std::string FilePath = g_sAssetsDir + sAssetName;
+
+	REQUIRE_FILE(FilePath);
 
 	Log("\n==============================\n");
 	Log("Asset aseq -> '%s'\n", assetPath);
-
-	while (!IsDebuggerPresent())
-		::Sleep(100);
-
-	auto SEAnimData = SEAsset::ReadAnimation(Utils::ChangeExtension(FilePath, ".seanim"), Utils::ChangeExtension(sAssetName, ".seanim"));
 
 	AnimHeader* pHdr = new AnimHeader();
 
@@ -148,14 +143,6 @@ void Assets::AddRseqAssets_v7(RPakFileBase* pak, std::vector<RPakAssetEntry>* as
 	char* pDataBuf = new char[DataBufferSize];
 
 	snprintf(pDataBuf, NameDataSize, "%s", sAssetName.c_str());
-
-	//if (mapEntry.HasMember("animseqs") && mapEntry["animseqs"].IsArray())
-	//{
-	//	//pHdr->AseqRefCount = mapEntry["animseqs"].Size();
-	//
-	//	//if (pHdr->AseqRefCount == 0)
-	//		Error("invalid animseq count must not be 0 for arig '%s'\n", assetPath);
-	//}
 
 	//std::string sAssetName = assetPath;
 	//std::string skelFilePath; //= g_sAssetsDir + sAssetName;

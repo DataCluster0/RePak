@@ -59,15 +59,14 @@ public:
 		ASSET_HANDLER("dtbl", file, m_Assets, Assets::AddDataTableAsset_v0, Assets::AddDataTableAsset_v1);
 		ASSET_HANDLER("rmdl", file, m_Assets, Assets::AddModelAsset_stub, Assets::AddModelAsset_v9);
 		ASSET_HANDLER("matl", file, m_Assets, Assets::AddMaterialAsset_v12, Assets::AddMaterialAsset_v15);
-		
-		ASSET_HANDLER("shds", file, m_Assets, Assets::AddShaderSetAsset_stub, Assets::AddShaderSetAsset_v11);
-		ASSET_HANDLER("shdr", file, m_Assets, Assets::AddShaderSetAsset_stub, Assets::AddShaderAsset_v12);
+
+		//ASSET_HANDLER("shds", file, m_Assets, Assets::AddShaderSetAsset_stub, Assets::AddShaderSetAsset_v11);
+		//ASSET_HANDLER("shdr", file, m_Assets, Assets::AddShaderSetAsset_stub, Assets::AddShaderAsset_v12);
 
 		//ASSET_HANDLER("stlt", file, assets, Assets::AddSettingsLayoutAsset, Assets::AddSettingsLayoutAsset);
 		//ASSET_HANDLER("stgs", file, m_Assets, Assets::AddSettingsAsset, Assets::AddSettingsAsset);
-		ASSET_HANDLER("arig", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
-		ASSET_HANDLER("aseq", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRseqAssets_v7);
-
+		//ASSET_HANDLER("arig", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRigAsset_v4);
+		//ASSET_HANDLER("aseq", file, m_Assets, Assets::AddRigAsset_stub, Assets::AddRseqAssets_v7);
 	};
 
 	size_t GetAssetCount() { return m_Assets.size(); };
@@ -135,7 +134,7 @@ public:
 		m_Header.relationCount = m_vFileRelations.size();
 
 		int version = m_Header.fileVersion;
-    
+
 		io->write(m_Header.magic);
 		io->write(m_Header.fileVersion);
 		io->write(m_Header.flags);

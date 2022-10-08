@@ -87,9 +87,6 @@
     <ClCompile Include="src\assets\animation.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\SEAsset.cpp">
-      <Filter>Source Files\assets</Filter>
-    </ClCompile>
     <ClCompile Include="src\math\Matrix.cpp">
       <Filter>Source Files\math</Filter>
     </ClCompile>
@@ -276,9 +273,6 @@
       <Filter>Header Files\assets</Filter>
     </ClInclude>
     <ClInclude Include="include\assets\model.h">
-      <Filter>Header Files\assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SEAsset.h">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
     <ClInclude Include="include\math\Matrix.h">
